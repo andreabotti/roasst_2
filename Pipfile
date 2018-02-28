@@ -1,0 +1,28 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+pandas = "*"
+dash = "*"
+numpy = "*"
+dash-core-components = "*"
+dash-html-components = "*"
+dash-table-experiments = "*"
+seaborn = "*"
+cufflinks = "*"
+dash-renderer = "*"
+ipython = "*"
+
+
+[dev-packages]
+
+
+
+[requires]
+
+python_version = "3.6"
