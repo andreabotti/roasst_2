@@ -2,12 +2,42 @@ import os
 from urllib import parse
 
 
+from sqlalchemy import create_engine
+
+# roasst_mysql_engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}?charset=utf8".format(
+#     host='jea.ensims.com',
+#     user="andreab",
+#     pw="abotti",
+#     db="ROASST")
+# )
+roasst_mysql_engine = create_engine(
+    "mysql+pymysql://{user}:{pw}@{host}/{db}".format(
+        host='localhost:8000',
+        user="root",
+        pw="r04sst",
+        db="roasst"),
+    echo=True,
+    )
+# roasst_mysql_engine = create_engine(
+#     "mysql+mysqlconnector://{user}:{pw}@{host}/{db}".format(
+#         host='jea.ensims.com',
+#         user="andreab",
+#         pw="abotti",
+#         db="ROASST"),
+#     echo=True
+#     )
+
+
+
+
+
+# Older
+
 DATABASE_SCHEME = """
 CREATE TABLE table_name1
 (
  -- Your columns
 );
-
 CREATE TABLE table_name2
 (
  -- Your columns
@@ -34,8 +64,3 @@ def create_db():
     cur = conn.cursor()
     cur.execute(DATABASE_SCHEME)
 
-
-def import_to_table_from_csv(table_name, path_to_csv, delimeter=';'):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(f"COPY {table_name} FROM '{path_to_csv}' WITH DELIMITER '{delimeter}' CSV HEADER;")

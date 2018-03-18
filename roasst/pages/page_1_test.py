@@ -1,8 +1,14 @@
 #
-import os
+import os, sys
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
+import sqlite3
+#
+import plotly
+from plotly import tools
+import plotly.plotly as py, plotly.graph_objs as go
+#
 
 
 # ROASST
@@ -10,50 +16,42 @@ import datetime as dt
 # from dash_utils.dash_lib_viz_charts_RP import *
 
 
-from roasst.app import app
-from roasst import urls
-from ..config import *
-from ..modules import *
-from ..menus import *
-from roasst.pages.charts_RP import *
-from roasst.pages.page_title import page_title
-
-#
-from roasst.db import roasst_mysql_engine
-conn_mysql = roasst_mysql_engine.connect()
+# from roasst.app import app
+# from roasst import urls
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+from config import *
+from modules import *
+from menus import *
+from page_title import page_title
+from charts_RP import *
 
 
 
 
 #####
-NORTH = [0,45,90,135]   #,180,225,270,315]
+NORTH = [0,45,90,135,180,225,270,315]
 N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
 
 #####
-bar_width = 15
+bar_width = 40
 bar_gap = 0;
 bar_group_gap = 0;
 bar_mode = 'group'
 #
 colors_dict = {
-    'HG_EP':'rgba(255, 0, 0, 0.8)',
-    'HG_IES':'rgba(255, 0, 0, 0.6)', 'HG_DSB':'rgba(255, 0, 0, 0.45)',
-    #
-    'HL_EP':'rgba(120, 163, 206, 0.8)',
-    'HL_IES':'rgba(120, 163, 206, 0.6)', 'HL_DSB':'rgba(120, 163, 206, 0.45)',
-    #
-    'VNT_EP':'rgba(120, 163, 206, 0.8)',
-    'VNT_IES':'rgba(120, 163, 206, 0.6)', 'VNT_DSB':'rgba(120, 163, 206, 0.45)',
-    #
-    'OH_EP':'rgba(0, 0, 0, 0.8)',
-    'OH_IES':'rgba(0, 0, 0, 0.6)','OH_DSB':'rgba(0, 0, 0, 0.45)',
+    'HG_IES':'rgba(255, 0, 0, 0.7)', 'HG_EP':'rgba(255, 0, 0, 0.4)',
+    'HL_IES':'rgba(120, 163, 206, 0.85)', 'HL_EP':'rgba(120, 163, 206, 0.55)',
+    'VNT_IES':'rgba(120, 163, 206, 0.85)', 'VNT_EP':'rgba(120, 163, 206, 0.55)',
+    'OH_IES':'rgba(0, 0, 0, 0.8)', 'OH_EP':'rgba(0, 0, 0, 0.55)',
     }
 #####
 
 
 # I need to query one database with simulation results to populate the menus
-D = 'P2302'
-SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
+D = 'P1201'
+SIM_TOOL, SIM_JOBS, RVX = 'JESS', 864, 'EMS_RP'
 sqlite_con = sqlite3.connect(
     os.path.join(
         DATA_FOLDER_PATH,
@@ -101,10 +99,20 @@ chart1 = html.Div(
         ],
 )
 
+#####
+app = dash.Dash()
+app.config.supress_callback_exceptions = True
+# CSS
+external_css = ["https://fonts.googleapis.com/css?family=Overpass:300,300i",
+                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/dab6f937fd5548cebf4c6dc7e93a10ac438f5efb/dash-technical-charting.css",
+                ]
+[app.css.append_css({"external_url": css}) for css in external_css]
+if 'DYNO' in os.environ:
+    app.scripts.append_script({'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'})
 
 #####
 
-page_1_layout = html.Div(
+app.layout = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
@@ -194,23 +202,22 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
     
     import time
     start_time = time.time()
-    all_traces = []
-    #
 
     N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
     fig_multi_rp = plotly.tools.make_subplots(
         rows=len(ROOMS), cols=6,
-        shared_xaxes=True, shared_yaxes=True, vertical_spacing=0.1,
-        )
+        shared_xaxes=True, shared_yaxes=True,
+        vertical_spacing=0.1)
     #
-    D = D_value; F = F_value; D_F = '{}_{}'.format(D_value, F_value)
+    D = D_value
+    F = F_value
+    D_F = '{}_{}'.format(D_value, F_value)
     W_value = '{}{}'.format(W1_value, W2_value)
     #
-    file = 'ALL_{}_RP.sqlite'.format(SIM_JOBS)
     table = '{}_{}_RP'.format(D, SIM_JOBS)
-    # conn = sqlite_connector(file=file)
+    conn = sqlite_connector( file='ALL_{}_RP.sqlite'.format(SIM_JOBS) )
     df_ep_rp = pd.read_sql_query(
-        con = conn_mysql,
+        con = conn,
         sql = """SELECT * FROM {table}
             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
             AND `{vBcol}` = '{VNT_B}' AND `{vKLcol}` = '{VNT_KL}'
@@ -224,9 +231,19 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
                 Gcol=Gcol, G=G_value,
                 ),
         )
-    print('df_ep_rp: {}'.format(df_ep_rp.shape))
+    print(df_ep_rp)
+    print(df_ep_rp.shape)
+    
+    #    
+    D_F_W = '{}_GTWDSY1'.format(D_F)
+    print(D_F_W)
+    conn = sqlite_connector( file='IES/IES_{}_RP.sqlite'.format(D_F_W) )
+    df_ies_rp = pd.read_sql_query(
+        con = conn,
+        sql = "SELECT * FROM {table}".format(table=D_F_W)
+        )
 
-    # Adding traces
+    all_traces = []
     for i in range(0, len(ROOMS), 1):
         row=i+1
         col=i+1
@@ -235,110 +252,22 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
 
         for N in NORTH:
             # print(int(N))
-            dash_fig_multi_RP_add_bars(
-                fig_multi=fig_multi_rp,
-                df=df_ep_rp, platform='EP',
+            dash_fig_multi_RP_add_bars(fig_multi=fig_multi_rp,
                 N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
+                df_ies=df_ies_rp, df_ep=df_ep_rp,
                 room=room, row=row,
-                bar_width=bar_width, outline_width=1.3,
-                colors_dict=colors_dict, all_traces=all_traces,
-                )
-
-    
-    try:
-        # SQLite (superseded)
-        # file = 'IES/IES_{}_RP.sqlite'.format(D)
-        # conn_sqlite = sqlite_connector(file=file)
-        #
-        table = 'IES_{}_RP'.format(D)
-        df_ies_rp = pd.read_sql_query(
-            con = conn_mysql,
-            sql = """SELECT * FROM {table}
-                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
-                """.format(
-                    table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value,
-                )
-            )
-        print('df_ies_rp: {}'.format(df_ies_rp.shape))
-        #
-        for i in range(0, len(ROOMS), 1):
-            row=i+1
-            col=i+1
-            room = ROOMS[i]
-            print('\n\ni:{} | room:{} | row:{}'.format(i, room, row))
-
-            for N in NORTH:
-                # print(int(N))
-                dash_fig_multi_RP_add_bars(
-                    fig_multi=fig_multi_rp,
-                    df=df_ies_rp, platform='IES',
-                    N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
-                    room=room, row=row,
-                    bar_width=bar_width, outline_width=1.3,
-                    colors_dict=colors_dict, all_traces=all_traces,
-                    )
-            print('IES traces added')
-    except:
-        'Do nothing'
-
-#####
-
-    try:
-        # SQLite (superseded)
-        # file = 'IES/IES_{}_RP.sqlite'.format(D)
-        # conn_sqlite = sqlite_connector(file=file)
-        #
-        table = 'DSBYZ_{}_RP'.format(D)
-        df_dsb_rp = pd.read_sql_query(
-            con = conn_mysql,
-            sql = """SELECT * FROM {table}
-                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
-                """.format(
-                    table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value,
-                )
-            )
-        print('df_dsb_rp: {}'.format(df_dsb_rp.shape))
-        #
-        for i in range(0, len(ROOMS), 1):
-            row=i+1
-            col=i+1
-            room = ROOMS[i]
-            print('\ni:{} | room:{} | row:{}'.format(i, room, row))
-
-            for N in NORTH:
-                # print(int(N))
-                dash_fig_multi_RP_add_bars(
-                    df=df_dsb_rp, platform='DSB',
-                    fig_multi=fig_multi_rp,
-                    N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
-                    room=room, row=row,
-                    bar_width=bar_width, outline_width=1.3,
-                    colors_dict=colors_dict, all_traces=all_traces,
-                    )
-            print('DSB traces added')
-    except:
-        'Do nothing'
+                bar_width=bar_width, outline_width=1.3, colors_dict=colors_dict, all_traces=all_traces)
 
         print('\t\t%s seconds' % (time.time() - start_time))
     
-
-
-
-
-#####
-
     layout_multi_rp = go.Layout(
         yaxis1=dict(
             title='<b>KL</b>', titlefont=dict(size=20),
             dtick=45,
-            showgrid=True,
             ),
         yaxis2=dict(
             title='<b>BD1</b>', titlefont=dict(size=20),
             dtick=45,
-            showgrid=True,
             ),
         # yaxis3=dict(
         #     title='<b>BS1</b>', titlefont=dict(size=20),
@@ -386,7 +315,7 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
         barmode = bar_mode,
         bargap = bar_gap,
         bargroupgap = bar_group_gap,
-        showlegend=False,
+        showlegend=True,
         title='EPLUS-IES COMPARISON<br><i>unit</i>: <b>{}</b> | <i>floor</i>: <b>{}</b>'.format(D, F),
     )
     fig_multi_rp['layout'].update(layout_multi_rp)
@@ -395,3 +324,24 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
     return fig_multi_rp
 
 
+
+
+
+
+port = 100
+#
+print('Dash on port: {}'.format(port))
+dash_url = "http://127.0.0.1:{}/".format(port)
+
+#
+import webbrowser  
+webbrowser.open(
+    dash_url,
+    new=1,
+    autoraise=True)
+
+
+if __name__ == '__main__':
+    app.run_server(
+        port=port,
+        debug=False)

@@ -1,25 +1,27 @@
 #
-import os
+import os, sys
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
-
-
-# ROASST
-# from dash_utils.dash_lib_viz_menus import *
-# from dash_utils.dash_lib_viz_charts_RP import *
-
-
-from roasst.app import app
-from roasst import urls
-from ..config import *
-from ..modules import *
-from ..menus import *
-from roasst.pages.charts_RP import *
-from roasst.pages.page_title import page_title
-
+import sqlite3
 #
-from roasst.db import roasst_mysql_engine
+import plotly
+from plotly import tools
+import plotly.plotly as py, plotly.graph_objs as go
+#
+
+
+# from roasst.app import app
+# from roasst import urls
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+from config import *
+from modules_test import *
+from menus import *
+from page_title import page_title
+from charts_RP import *
+from db import *
 conn_mysql = roasst_mysql_engine.connect()
 
 
@@ -53,7 +55,7 @@ colors_dict = {
 
 # I need to query one database with simulation results to populate the menus
 D = 'P2302'
-SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
+SIM_TOOL, SIM_JOBS, RVX = 'JESS', 216, 'EMS_HR_RP'
 sqlite_con = sqlite3.connect(
     os.path.join(
         DATA_FOLDER_PATH,
@@ -101,10 +103,20 @@ chart1 = html.Div(
         ],
 )
 
+#####
+app = dash.Dash()
+app.config.supress_callback_exceptions = True
+# CSS
+external_css = ["https://fonts.googleapis.com/css?family=Overpass:300,300i",
+                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/dab6f937fd5548cebf4c6dc7e93a10ac438f5efb/dash-technical-charting.css",
+                ]
+[app.css.append_css({"external_url": css}) for css in external_css]
+if 'DYNO' in os.environ:
+    app.scripts.append_script({'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'})
 
 #####
 
-page_1_layout = html.Div(
+app.layout = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
@@ -395,3 +407,24 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
     return fig_multi_rp
 
 
+
+
+
+
+port = 100
+#
+print('Dash on port: {}'.format(port))
+dash_url = "http://127.0.0.1:{}/".format(port)
+
+#
+import webbrowser  
+webbrowser.open(
+    dash_url,
+    new=1,
+    autoraise=True)
+
+
+if __name__ == '__main__':
+    app.run_server(
+        port=port,
+        debug=False)

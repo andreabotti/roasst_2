@@ -2,11 +2,11 @@ import pandas as pd
 import os
 import sqlite3
 
-from config import DATA_FOLDER_PATH
+from roasst.config import DATA_FOLDER_PATH
 
 
-# df_acr_large = pd.read_csv(DATA_FOLDER_PATH + '/df_acr_small.csv')
-# df_acr_large = pd.read_csv(DATA_FOLDER_PATH + '/df_acr_large.csv')
+df_acr_large = pd.read_csv(DATA_FOLDER_PATH + '/df_acr_small.csv')
+df_acr_large = pd.read_csv(DATA_FOLDER_PATH + '/df_acr_large.csv')
 
 
 def get_db_ep_rp(db_name, db_folder):
@@ -20,20 +20,33 @@ def query_sqlite_sji(db_name, db_folder, table):
     df = pd.read_sql_query('SELECT * FROM {}'.format(table), sqlite_con)
     return df
 #
-def query_sqlite_simres_hr(db_name, db_folder, table):
-    db = os.path.join(DATA_FOLDER_PATH, db_folder, '{}_HR.sqlite'.format(db_name))
-    sqlite_con = sqlite3.connect(db)
-    df = pd.read_sql_query('SELECT * FROM {}'.format(table), sqlite_con)
-    #
-    df.set_index('datetime',inplace=True)
-    return df
-#
 def query_sqlite_simres_rp(db_name, db_folder, table):
     db = os.path.join(DATA_FOLDER_PATH, db_folder, '{}_RP.sqlite'.format(db_name))
     sqlite_con = sqlite3.connect(db)
     df = pd.read_sql_query('SELECT * FROM {}'.format(table),sqlite_con)
     #
     df.set_index('job_id',inplace=True)
+    return df
+#
+def query_sqlite_simres_hr(db_name, db_folder, table):
+    db = os.path.join(DATA_FOLDER_PATH, db_folder, '{}_HR.sqlite'.format(db_name))
+    sqlite_con = sqlite3.connect(db)
+    df = pd.read_sql_query(
+        'SELECT * FROM {}'.format(table),
+        sqlite_con,
+        )
+    #
+    df.set_index('datetime',inplace=True)
+    return df
+#
+def query_sqlite_simres_hr_job_id(db_name, db_folder, table, job_id):
+    db = os.path.join(DATA_FOLDER_PATH, db_folder, '{}_HR.sqlite'.format(db_name))
+    sqlite_con = sqlite3.connect(db)
+    query = "SELECT * FROM {} WHERE job_id='{}'".format(table, job_id)
+    print(query)
+    df = pd.read_sql_query(query, sqlite_con)
+    #
+    df.set_index('datetime',inplace=True)
     return df
 
 

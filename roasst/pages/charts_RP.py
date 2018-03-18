@@ -1,7 +1,7 @@
 # other libraries
 import matplotlib.pyplot as plt
 plt.rcdefaults()
-import seaborn as sns
+# import seaborn as sns
 import cufflinks as cf
 from pandas import *
 
@@ -21,14 +21,160 @@ import dash_table_experiments as dt
 
 
 
+#####
 
 
-def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
-    room, bar_width, outline_width, colors_dict, all_traces):
+def dash_fig_multi_RP_add_bars(fig_multi,
+    df, platform,
+    N, N_angle_dict, Ncol,
+    row, room, bar_width, outline_width, colors_dict, all_traces):
 
-    df_ies = df_ies.loc[ df_ies['@north'].astype(int) == N ]
-    df_ies.set_index('@north', inplace=True)
-    engine = 'IES'
+    df = df.loc[ df[Ncol].astype(int) == N ]
+    df.set_index(Ncol, inplace=True)
+    bar_fill = 'rgba(0,0,0,0)'
+    #
+    # y = '{} ({})'.format(df.index,N_angle_dict[df.index])
+    try:
+        print(N,'\t',df.iloc[0][room+'_TM59_Ca'])
+    except:
+        'Do nothing'
+    #
+    y = df.index
+    #
+    x1a = df[room+'_HL_VNT(kWh)']
+    name='HL_VNT({})'.format(platform),
+    # text = '{}'.format(x1a[0].round(1))
+    trace1a = go.Bar(
+        x = x1a,
+        y = y,
+        xaxis='x1',
+        yaxis='y{}'.format(row),
+        orientation='h',
+        width=bar_width,
+        marker=dict(color=colors_dict['HL_'+platform]),
+        # name=text,
+        text=platform,
+        legendgroup='{}'.format(platform),
+        )
+    fig_multi.append_trace(trace1a, row=row, col=1)
+    all_traces.append(trace1a)
+    # print(trace.name, text)
+
+    #
+    x2a = df[room+'_HG_SOLAR(kWh)']
+    name='HL_SOLAR({})'.format(platform)
+    # text = '{}'.format(x2a[0].round(1))
+    trace2a = go.Bar(
+        x = x2a,
+        y = y,
+        xaxis='x2',
+        yaxis='y{}'.format(row),
+        orientation='h',
+        width=bar_width,
+        marker=dict(color=colors_dict['HG_'+platform]),
+        # name=name,
+        # text=text,
+        legendgroup='{}'.format(platform),
+        )
+    fig_multi.append_trace(trace2a, row=row, col=2)
+    all_traces.append(trace2a)
+    # print(trace.name, text)
+    
+
+    #
+    x4a = df[room+'_VNT(ach)']
+    name='VNT(ach)({})'.format(platform),
+    # text = '{}'.format(x4a[0].round(1))
+    trace = go.Bar(
+        x = x4a,
+        y = y,
+        xaxis='x4',
+        yaxis='y{}'.format(row),
+        orientation='h',
+        width=bar_width,
+        marker=dict( color=colors_dict['VNT_'+platform] ),
+        # name=name,
+        # text=text,
+        textposition='inside',
+        textfont=dict(color='rgba(255,255,255,0.8)'),
+        legendgroup='{}'.format(platform),
+        )
+    fig_multi.append_trace(trace, row=row, col=4)
+    all_traces.append(trace)
+    # print(trace.name, text)
+
+    # x5a = df[room+'_HA26c']
+    # name='_HA26p({})'.format(platform),
+    # trace = go.Bar(
+    #     x = x5a,
+    #     y = y,
+    #     xaxis='x5',
+    #     yaxis='y{}'.format(row),
+    #     orientation='h',
+    #     width=bar_width,
+    #     marker=dict(
+    #         line=dict(color=colors_dict['OH_'+platform], width=outline_width),
+    #         color=bar_fill,
+    #         ),
+    #     name=name,
+    #     # text='{}'.format(y3a[0].round(1)), textposition='inside',
+    #     # textfont=dict(color='rgba(255,255,255,0.8)'),
+    #     legendgroup='{}'.format(platform),
+    #     )
+    # fig_multi.append_trace(trace, row=row, col=5)
+    # all_traces.append(trace)
+
+    #
+    x6a = df[room+'_TM59_Ca']
+    name = 'TM59_Ca({})'.format(platform),
+    # text = '{}'.format(x6a[0].round(1))
+    trace = go.Bar(
+        x = x6a,
+        y = y,
+        xaxis='x6',
+        yaxis='y{}'.format(row),
+        orientation='h',
+        width=bar_width,
+        marker=dict( color=colors_dict['OH_'+platform] ),
+        name=name,
+        text=platform,
+        textposition='inside',
+        textfont=dict(color='rgba(255,255,255,0.8)'),
+        legendgroup='{}'.format(platform),
+        )
+    fig_multi.append_trace(trace, row=row, col=6)
+    all_traces.append(trace)
+    # print(trace.name, text)
+
+
+
+#####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####
+
+def dash_fig_multi_RP_add_bars_old(fig_multi,
+    df_ies, df_ep, N, N_angle_dict, Ncol,
+    row, room, bar_width, outline_width, colors_dict, all_traces):
+
+    df_ies = df_ies.loc[ df_ies[Ncol].astype(int) == N ]
+    df_ies.set_index(Ncol, inplace=True)
+    platform = 'IES'
     bar_fill = 'rgba(0,0,0,0)' 
     #
 
@@ -38,7 +184,7 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
     #
     x1a = df_ies[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(engine),
+    name='HL_VNT({})'.format(platform),
     # text = '{}'.format(x1a[0].round(1))
     trace1a = go.Bar(
         x = x1a,
@@ -48,12 +194,12 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HL_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HL_'+platform], width=outline_width),
             color=bar_fill,
             ),        
         # name=text,
         # text=text,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace1a, row=row, col=1)
     all_traces.append(trace1a)
@@ -61,7 +207,7 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
     #
     x2a = df_ies[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(engine)
+    name='HL_SOLAR({})'.format(platform)
     # text = '{}'.format(x2a[0].round(1))
     trace2a = go.Bar(
         x = x2a,
@@ -71,45 +217,21 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HG_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
             color=bar_fill,
             ),        
         # name=name,
         # text=text,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace2a, row=row, col=2)
     all_traces.append(trace2a)
     # print(trace.name, text)
     
-    #
-    x3a = df_ies[room+'_VNT(l/s)']
-    name = 'VNT(l/s)({})'.format(engine)
-    # text = '{}'.format(x3a[0].round(1))
-    trace = go.Bar(
-        x = x3a,
-        y = y,
-        xaxis='x3',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['HL_'+engine], width=outline_width),
-            color=bar_fill,
-            ),
-        # name=name,
-        # text=text,
-        textposition='inside',
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
-        )
-    fig_multi.append_trace(trace, row=row, col=3)
-    all_traces.append(trace)
-    # print(trace.name, text)
 
     #
     x4a = df_ies[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(engine),
+    name='VNT(ach)({})'.format(platform),
     # text = '{}'.format(x4a[0].round(1))
     trace = go.Bar(
         x = x4a,
@@ -119,21 +241,21 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['VNT_'+engine], width=outline_width),
+            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
             color=bar_fill,
             ),
         # name=name,
         # text=text,
         textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
     # print(trace.name, text)
 
-    x5a = df_ies[room+'_HA26p'] * 100
-    name='_HA26p({})'.format(engine),
+    x5a = df_ies[room+'_HA26c']
+    name='_HA26p({})'.format(platform),
     trace = go.Bar(
         x = x5a,
         y = y,
@@ -142,20 +264,20 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['OH_'+engine], width=outline_width),
+            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         # text='{}'.format(y3a[0].round(1)), textposition='inside',
         # textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=5)
     all_traces.append(trace)
 
     #
     x6a = df_ies[room+'_TM59_Ca'] * 100
-    name = 'TM59_Ca({})'.format(engine),
+    name = 'TM59_Ca({})'.format(platform),
     # text = '{}'.format(x5a[0].round(1))
     trace = go.Bar(
         x = x6a,
@@ -165,14 +287,14 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['OH_'+engine], width=outline_width),
+            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
             color=bar_fill,
             ),
         # name=name,
         # text=text,
         textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=6)
     all_traces.append(trace)
@@ -181,11 +303,11 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
 #####
 
-    engine = 'EP'
-    df_ep = df_ep.loc[ df_ep['@north'] == N ]
+    platform = 'EP'
+    df_ep = df_ep.loc[ df_ep[Ncol] == N ]
     #
     x1b = - df_ep[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(engine),
+    name='HL_VNT({})'.format(platform),
     trace = go.Bar(
         x = x1b,
         y = y,
@@ -193,9 +315,9 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HL_'+engine]),
+        marker=dict(color=colors_dict['HL_'+platform]),
         # name=name,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -203,7 +325,7 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
     #
     x2b = df_ep[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     # text = '{}'.format(x2b[0].round(1))
     trace = go.Bar(
         x = x2b,
@@ -212,44 +334,18 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HG_'+engine]),        
+        marker=dict(color=colors_dict['HG_'+platform]),        
         # name=name,
         # text=text,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
     # print(trace.name, text)
 
     #
-    x3b = df_ep[room+'_VNT(l/s)']
-    name='VNT(l/s)({})'.format(engine)
-    # text = '{}'.format(x3b[0].round(1))
-    # if x3b>x3a:
-    #     text_pos = 'outside'
-    # else:
-    #     text_pos = 'inside'
-
-    trace = go.Bar(
-        x = x3b,
-        y = y,
-        xaxis='x3',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
-        # name=name,
-        # text=text,
-        # textposition=text_pos,
-        legendgroup='{}'.format(engine),
-        )
-    fig_multi.append_trace(trace, row=row, col=3)
-    all_traces.append(trace)
-    # print(trace.name, text)
-
-    #
     x4b = df_ep[room+'_VNT(ach)']
-    # name='VNT(ach)({})'.format(engine)
+    # name='VNT(ach)({})'.format(platform)
     # text = '{}'.format(x4b[0].round(1))
     # if x4b>x4a:
     #     text_pos = 'outside'
@@ -263,11 +359,11 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
+        marker=dict(color=colors_dict['VNT_'+platform]),
         # name=name,
         # text=text,
         # textposition=text_pos,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
@@ -275,8 +371,9 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
 
     #
-    x5b = df_ep[room+'_HA26p'] * 100
-    name='_HA26p({})'.format(engine)
+    x5b = df_ep[room+'_HA26c']
+
+    name='_HA26p({})'.format(platform)
     # text = '{}'.format(x5b[0].round(1))
     text_pos = 'inside'    
     trace = go.Bar(
@@ -286,20 +383,20 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['OH_'+engine]),
+        marker=dict(color=colors_dict['OH_'+platform]),
         # name=name,
         # text=text,
         textposition=text_pos,
         textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=5)
     all_traces.append(trace)
     # print(trace.name, text)
 
     #
-    x6b = df_ep[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(engine)
+    x6b = df_ep[room+'_TM59_Ca']
+    name='TM59_Ca({})'.format(platform)
     # text = '{}'.format(x5b[0].round(1))
     text_pos = 'inside'    
     trace = go.Bar(
@@ -309,12 +406,12 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['OH_'+engine]),
+        marker=dict(color=colors_dict['OH_'+platform]),
         # name=name,
         # text=text,
         textposition=text_pos,
         textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=6)
     all_traces.append(trace)
@@ -338,16 +435,16 @@ def dash_fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
     room, bar_width, outline_width, colors_dict, all_traces):
 
-    df_ies = df_ies.loc[ df_ies['@north'] == int(N) ]
-    df_ep = df_ep.loc[ df_ep['@north'] == int(N) ]
+    df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
+    df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
     # print(df_ies)
 
 
-    engine = 'IES'
+    platform = 'IES'
     bar_fill = 'rgba(0,0,0,0)' 
     #
     y1a = df_ies[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(engine),
+    name='HL_VNT({})'.format(platform),
     trace = go.Bar(
         x = y1a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -356,17 +453,17 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HL_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HL_'+platform], width=outline_width),
             color=bar_fill,
             ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(engine),
+        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
     
     #
     y2a = df_ies[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y2a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -375,10 +472,10 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HG_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
             color=bar_fill,
             ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(engine),
+        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
@@ -386,7 +483,7 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
     
     #
     y3a = df_ies[room+'_VNT(l/s)']
-    name='VNT(l/s)({})'.format(engine),
+    name='VNT(l/s)({})'.format(platform),
     trace = go.Bar(
         x = y3a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -395,20 +492,20 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HL_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HL_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y3a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=3)
     all_traces.append(trace)
     
     #
     y4a = df_ies[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(engine),
+    name='VNT(ach)({})'.format(platform),
     trace = go.Bar(
         x = y4a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -417,20 +514,20 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['VNT_'+engine], width=outline_width),
+            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y4a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
 
     #
     y5a = df_ies[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(engine),
+    name='TM59_Ca({})'.format(platform),
     trace = go.Bar(
         x = y5a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -439,13 +536,13 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['OH_'+engine], width=outline_width),
+            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y5a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=5)
     all_traces.append(trace)
@@ -454,10 +551,10 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
 
 #####
 
-    engine = 'EP'
+    platform = 'EP'
     #
     y1b = - df_ep[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(engine),
+    name='HL_VNT({})'.format(platform),
     trace = go.Bar(
         x = y1b,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -465,15 +562,15 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HL_'+engine]),
-        name=name, legendgroup='{}'.format(engine),
+        marker=dict(color=colors_dict['HL_'+platform]),
+        name=name, legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
 
     #
     y2b = df_ep[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y2b,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -481,15 +578,15 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HG_'+engine]),        
-        name=name, text='{}'.format(engine), legendgroup='{}'.format(engine),
+        marker=dict(color=colors_dict['HG_'+platform]),        
+        name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
 
     #
     y3b = df_ep[room+'_VNT(l/s)']
-    name='VNT(l/s)({})'.format(engine)
+    name='VNT(l/s)({})'.format(platform)
     if y3b[0]>y3a[0]:
         text_pos = 'outside'
     else:
@@ -502,18 +599,18 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
+        marker=dict(color=colors_dict['VNT_'+platform]),
         name=name,
         text='{}'.format(y3b[0].round(1)),
         textposition=text_pos,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=3)
     all_traces.append(trace)
 
     #
     y4b = df_ep[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(engine)
+    name='VNT(ach)({})'.format(platform)
     if y4b[0]>y4a[0]:
         text_pos = 'outside'
     else:
@@ -526,18 +623,18 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
+        marker=dict(color=colors_dict['VNT_'+platform]),
         name=name,
         text='{}'.format(y4b[0].round(1)),
         textposition=text_pos,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
 
     #
     y5b = df_ep[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(engine),
+    name='TM59_Ca({})'.format(platform),
     text_pos = 'inside'    
     trace = go.Bar(
         x = y5b,
@@ -546,12 +643,12 @@ def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['OH_'+engine]),
+        marker=dict(color=colors_dict['OH_'+platform]),
         name=name,
         text='{}'.format(y5b[0].round(1)),
         textposition=text_pos,
         textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=5)
     all_traces.append(trace)
@@ -629,16 +726,16 @@ def create_update_menu_RP(df_ep, values_list, groups, lenght_true_false, U, F):
 def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_angle_dict, row,
     room, bar_width, outline_width, colors_dict, all_traces):
 
-    df_ies = df_ies.loc[ df_ies['@north'] == int(N) ]
-    df_ep = df_ep.loc[ df_ep['@north'] == int(N) ]
+    df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
+    df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
     # print(df_ies)
 
 
-    engine = 'IES'
+    platform = 'IES'
     bar_fill = 'rgba(0,0,0,0)' 
     #
     y1a = df_ies[room+'_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y1a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -647,10 +744,10 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HG_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
             color=bar_fill,
             ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(engine),
+        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -658,7 +755,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         
     #
     y2a = df_ies[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(engine),
+    name='VNT(ach)({})'.format(platform),
     trace = go.Bar(
         x = y2a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -667,13 +764,13 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['VNT_'+engine], width=outline_width),
+            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y2a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
@@ -681,7 +778,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
     #
     y3a = df_ies[room+'_HA26p'] * 100
-    name='_HA26p({})'.format(engine),
+    name='_HA26p({})'.format(platform),
     trace = go.Bar(
         x = y3a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -690,13 +787,13 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['OH_'+engine], width=outline_width),
+            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y3a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=3)
     all_traces.append(trace)
@@ -704,7 +801,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
     #
     y4a = df_ies[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(engine),
+    name='TM59_Ca({})'.format(platform),
     trace = go.Bar(
         x = y4a,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -713,13 +810,13 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['OH_'+engine], width=outline_width),
+            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y4a[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
@@ -728,10 +825,10 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
 #####
 
-    engine = 'EP'
+    platform = 'EP'
     #
     y1b = df_ep[room+'_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y1b,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -739,8 +836,8 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HG_'+engine]),        
-        name=name, text='{}'.format(engine), legendgroup='{}'.format(engine),
+        marker=dict(color=colors_dict['HG_'+platform]),        
+        name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -748,7 +845,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
     #
     y2b = df_ep[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(engine)
+    name='VNT(ach)({})'.format(platform)
     trace = go.Bar(
         x = y2b,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -756,11 +853,11 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
+        marker=dict(color=colors_dict['VNT_'+platform]),
         name=name,
         # text='{}'.format(y2b[0].round(1)),
 
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
@@ -768,7 +865,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
     #
     y3b = df_ep[room+'_HA26p'] * 100
-    name='HA26p({})'.format(engine),
+    name='HA26p({})'.format(platform),
     trace = go.Bar(
         x = y3b,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -776,18 +873,18 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['OH_'+engine]),
+        marker=dict(color=colors_dict['OH_'+platform]),
         name=name,
         # text='{}'.format(y3b[0].round(1)),
         textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=3)
     all_traces.append(trace)
 
     #
     y4b = df_ep[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(engine),
+    name='TM59_Ca({})'.format(platform),
     text_pos = 'inside'    
     trace = go.Bar(
         x = y4b,
@@ -796,12 +893,12 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
         yaxis='y{}'.format(row),
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['OH_'+engine]),
+        marker=dict(color=colors_dict['OH_'+platform]),
         name=name,
         # text='{}'.format(y4b[0].round(1)),
         # textposition=text_pos,
         textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
@@ -814,17 +911,17 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
     room, bar_width, outline_width, colors_dict, all_traces):
 
 
-    df_ies = df_ies.loc[ df_ies['@north'] == int(N) ]
-    df_ep = df_ep.loc[ df_ep['@north'] == int(N) ]
+    df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
+    df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
     row = 3
 
     ######
     
-    engine = 'IES'
+    platform = 'IES'
     bar_fill = 'rgba(0,0,0,0)' 
     #
     y1a_sum = df_ies['BD1_HG_SOLAR(W)'] + df_ies['KL_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y1a_sum,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -833,10 +930,10 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['HG_'+engine], width=outline_width),
+            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
             color=bar_fill,
             ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(engine),
+        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -845,7 +942,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
     #
     y2a_avg = (df_ies['BD1_VNT(ach)']*35.25 + df_ies['BD1_VNT(ach)']*64.76)/149.69
 
-    name='VNT(ach)({})'.format(engine),
+    name='VNT(ach)({})'.format(platform),
     trace = go.Bar(
         x = y2a_avg,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -854,23 +951,23 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
         orientation='h',
         width=bar_width,
         marker=dict(
-            line=dict(color=colors_dict['VNT_'+engine], width=outline_width),
+            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
             color=bar_fill,
             ),
         name=name,
         text='{}'.format(y2a_avg[0].round(1)), textposition='inside',
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
 
 
 
-    engine = 'EP'
+    platform = 'EP'
     #
     y1b_sum = df_ep['BD1_HG_SOLAR(W)'] + df_ep['KL_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(engine),
+    name='HL_SOLAR({})'.format(platform),
     trace = go.Bar(
         x = y1b_sum,
         y = '{} ({})'.format(N,N_angle_dict[N]),
@@ -878,8 +975,8 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
         yaxis='y3',
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['HG_'+engine]),        
-        name=name, text='{}'.format(engine), legendgroup='{}'.format(engine),
+        marker=dict(color=colors_dict['HG_'+platform]),        
+        name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -887,7 +984,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
 
     #
     y2b_avg = (df_ep['BD1_VNT(ach)']*35.25 + df_ep['BD1_VNT(ach)']*64.76)/149.69
-    name='VNT(ach)({})'.format(engine)
+    name='VNT(ach)({})'.format(platform)
 
     trace = go.Bar(
         x = y2b_avg,
@@ -896,10 +993,10 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
         yaxis='y3',
         orientation='h',
         width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+engine]),
+        marker=dict(color=colors_dict['VNT_'+platform]),
         name=name,
         # text='{}'.format(y2b_avg[0].round(1)),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
@@ -907,7 +1004,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
 
 #####
 
-    df_sap = df_sap.loc[ df_sap['@north'] == int(N) ]
+    df_sap = df_sap.loc[ df_sap[Ncol] == int(N) ]
 
     
     y1sap = df_sap['Gss_jun']
@@ -923,7 +1020,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
             symbol='circle-open',
         ),      
         name=name,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=1)
     all_traces.append(trace)
@@ -944,7 +1041,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
         ),      
         name=name,
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=2)
     all_traces.append(trace)
@@ -964,7 +1061,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
             symbol='star-open',
             ),
         name=name,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
@@ -982,7 +1079,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
             symbol='square-open',
             ),
         name=name,
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)
@@ -1001,7 +1098,7 @@ def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, 
             ),
         name=name,      
         textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(engine),
+        legendgroup='{}'.format(platform),
         )
     fig_multi.append_trace(trace, row=row, col=4)
     all_traces.append(trace)

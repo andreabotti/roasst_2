@@ -1,20 +1,44 @@
+import os, sys
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
+#
+import sqlite3
 
-# ROASST
-# from dash_utils.dash_lib_sql_query import *
-# from dash_utils.dash_lib_viz_menus import *
-# from dash_utils.dash_lib_viz_charts_HR import *
 
-from roasst.app import app
-from roasst import urls
-from ..config import *
-from ..modules import *
-from ..menus import *
-from roasst.pages.charts_HR import *
-from ..db import roasst_mysql_engine
-from roasst.pages.page_title import page_title
+# from ..roasst.app import app
+# from ..roasst import urls
+
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+from config import *
+from menus import *
+from charts_HR import *
+from page_title import page_title
+from db import *
+conn_mysql = roasst_mysql_engine.connect()
+
+#
+from modules_test import *
+# Replaced by
+CURRENT_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
+DATA_FOLDER_PATH = CURRENT_DIR_PATH + '/data'
+DATA_FOLDER_PATH = 'D:/Dropbox/EDU_EngD/ROASST/github/roasst_2/roasst/data'
+DWELLINGS = ['P2302']
+
+
+
+
+app = dash.Dash()
+app.config.supress_callback_exceptions = True
+# CSS
+external_css = ["https://fonts.googleapis.com/css?family=Overpass:300,300i",
+                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/dab6f937fd5548cebf4c6dc7e93a10ac438f5efb/dash-technical-charting.css",
+                ]
+[app.css.append_css({"external_url": css}) for css in external_css]
+if 'DYNO' in os.environ:
+    app.scripts.append_script({'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'})
 
 
 
@@ -48,6 +72,7 @@ df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),sqlite_con)
 #
 
 
+#
 input_menus = html.Div(
     className = 'row',
     style={
@@ -87,7 +112,7 @@ chart1 = html.Div(
 
 #####
 
-page_2_layout = html.Div(
+app.layout = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
@@ -307,3 +332,23 @@ def update_chart_scatter_hr(
     return fig_hr
 
 
+
+
+
+port = 200
+#
+print('Dash on port: {}'.format(port))
+dash_url = "http://127.0.0.1:{}/".format(port)
+
+#
+import webbrowser  
+webbrowser.open(
+    dash_url,
+    new=1,
+    autoraise=True)
+
+
+if __name__ == '__main__':
+    app.run_server(
+        port=port,
+        debug=False)
