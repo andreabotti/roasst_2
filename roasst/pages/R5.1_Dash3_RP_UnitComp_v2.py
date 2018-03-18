@@ -19,7 +19,6 @@ import dash_table_experiments as dt
 
 # ROASST
 from dash_utils._main_settings import *
-from dash_utils.dash_lib_sql_query import *
 from dash_utils.dash_lib_viz_menus import *
 from dash_utils.dash_lib_viz_charts_RP import *
 

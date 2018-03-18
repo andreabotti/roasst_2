@@ -1,3 +1,4 @@
+import os, sys
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
@@ -16,8 +17,10 @@ import dash_html_components as html
 import webbrowser
 
 # ROASST
+PACKAGE_PARENT = '../..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 from dash_utils._main_settings import *
-from dash_utils.dash_lib_sql_query import *
 from dash_utils.dash_lib_viz_menus import *
 from dash_utils.dash_lib_viz_charts_HR import *
 

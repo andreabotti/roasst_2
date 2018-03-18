@@ -10,9 +10,8 @@ import datetime as dt
 from roasst.app import app
 from roasst import urls
 from ..config import *
-from ..modules import *
 from ..menus import *
-from ..charts_HR import *
+from roasst.pages.charts_HR import *
 from roasst.pages.page_title import page_title
 
 
@@ -20,8 +19,8 @@ from roasst.pages.page_title import page_title
 
 #####
 bar_width = 0.8
-bar_gap = 1;
-bar_group_gap = 0;
+bar_gap = 1
+bar_group_gap = 0
 bar_mode = 'group'
 #
 colors_dict = {
@@ -32,11 +31,16 @@ colors_dict = {
     }
 
 #####
-# I need to query one database with simulation results to populate the menus
-df_sji_csv = pd.read_csv( os.path.join(DATA_FOLDER_PATH, str(SIM_JOBS), 'SimJobIndex.csv') )
-df_sji_csv = process_sji(df=df_sji_csv)
 
+# I need to query one database with simulation results to populate the menus
+D = DWELLINGS[0]
+SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
+
+table = '{}_{}_SJI'.format(D, SIM_JOBS)
+df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),app.db_conn)
 #
+
+
 input_menus = html.Div(
     className = 'row',
     style={
@@ -44,21 +48,22 @@ input_menus = html.Div(
         'font-size':13,
         },
     children=[
-        dash_create_menu_unit(menu_id='D_input(p2)', cols='two', menu_type='radio',
-            DWELLINGS=DWELLINGS),
-        dash_create_menu_weather(menu_id=['W1_input(p2)','W2_input(p2)'], cols='one',
+        dash_create_menu_unit(menu_id='D_input(p2)',
+            width='two', menu_type='radio', DWELLINGS=DWELLINGS),
+        dash_create_menu_weather(menu_id=['W1_input(p2)','W2_input(p2)'], widths=['one','one'],
             WEATHER_FILES=WEATHER_FILES),
-        dash_create_menu_floor(menu_id='F_input(p2)', cols='one',
-            df=df_sji_csv),
-        dash_create_menu_north(menu_id='N_input(p2)',  cols='one',
-            df=df_sji_csv,),
-        dash_create_menu_vnt(menu_id=['VNT_KL_input(p2)','VNT_B_input(p2)'], cols='two',
-            df=df_sji_csv),
-        dash_create_menu_window_width(menu_id=['WW_KL_input(p2)','WW_B_input(p2)'], cols='one',
-            df=df_sji_csv),
-        dash_create_menu_glazing(menu_id='G_input(p2)', cols='one', df=df_sji_csv),
-        dash_create_menu_rooms(menu_id='R_input(p2)', cols='one', ROOMS=ROOMS),
-        dash_create_menu_daterange(cols='one'),
+        dash_create_menu_floor(menu_id='F_input(p2)', col=Fcol,
+            width='one', df=df_sji),
+        dash_create_menu_north(menu_id='N_input(p2)', col=Ncol,
+            width='one', df=df_sji),
+        dash_create_menu_vnt(menu_id=['VNT_KL_input(p2)','VNT_B_input(p2)'],
+            cols=[vBcol,vKLcol], width='two', df=df_sji),
+        dash_create_menu_window_width(menu_id=['WW_KL_input(p2)','WW_B_input(p2)'],
+            cols=[wwBcol,wwKLcol], width='one', df=df_sji),
+        dash_create_menu_glazing(menu_id='G_input(p2)', col=Gcol,
+            width='one', df=df_sji),
+        dash_create_menu_rooms(menu_id='R_input(p2)', width='one', ROOMS=ROOMS),
+        dash_create_menu_datepickerrange(width='one'),
         ],
     )
 
@@ -102,12 +107,11 @@ def set_vnt_KL_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    df_sji = query_sqlite_sji(
-        db_folder=str(SIM_JOBS),
-        db_name=D_F, table='SimJobIndex',
-        )
+    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
+
     #
-    VNT_KL_list = df_sji['@vnt_KL(m3/s)'].unique()
+    VNT_KL_list = df_sji[vKLcol].unique()
     VNT_KL_options = [{'label': '{}'.format(int(1000*x)), 'value': x} for x in VNT_KL_list ]
     return VNT_KL_options
 @app.callback(
@@ -126,12 +130,11 @@ def set_vnt_B_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    df_sji = query_sqlite_sji(
-        db_folder=str(SIM_JOBS),
-        db_name=D_F, table='SimJobIndex',
-        )
+    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
+
     #
-    VNT_B_list = df_sji['@vnt_B(m3/s)'].unique()
+    VNT_B_list = df_sji[vBcol].unique()
     VNT_B_options = [{'label': '{}'.format(int(1000*x)), 'value': x} for x in VNT_B_list ]
     return VNT_B_options
 @app.callback(
@@ -139,7 +142,8 @@ def set_vnt_B_options(D_value, F_value):
     [Input('VNT_B_input(p2)', 'options')]
 )
 def set_vnt_B_value(available_options):
-    return available_options[0]['value'], 
+    value = available_options[0]
+    return value, 
 
 
 #####
@@ -153,7 +157,8 @@ def set_vnt_B_value(available_options):
         Input('VNT_B_input(p2)', 'value'), Input('VNT_KL_input(p2)', 'value'),
         Input('WW_B_input(p2)', 'value'), Input('WW_KL_input(p2)', 'value'),
         Input('G_input(p2)', 'value'), Input('R_input(p2)', 'value'),
-        Input('RangeSlider_month', 'value'), 
+        Input('date_picker_range', 'start_date'), Input('date_picker_range', 'end_date'),
+        # Input('RangeSlider_month', 'value'),
     ]
     )
 
@@ -163,57 +168,115 @@ def update_chart_scatter_hr(
     F_value, N_value,
     VNT_B_value, VNT_KL_value, WW_B_value, WW_KL_value,
     G_value, room,
-    range_month,
+    start_date, end_date,
     ):
-    
+    traces_hr = []
     import time
     start_time = time.time()
-
+    #
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
     W_value = '{}{}'.format(W1_value, W2_value)
-
-    # FILTERING DATA
-    df_sji = query_sqlite_sji(
-        db_folder=str(SIM_JOBS),
-        db_name=D_F, table='SimJobIndex',
-        )
-    df = df_sji
-    # print(df_sji[:3])
-    print('{}|{}|{}|{}|{}|{}'.format(W_value, D_value, F_value, N_value, VNT_KL_value, VNT_B_value))
-    df_EP_JOB = df[
-        (df['@weather'] == W_value) & (df['@floor'] == F_value) & (df['@north'] == N_value) &
-        (df['@vnt_B(m3/s)'] == VNT_B_value) & (df['@vnt_KL(m3/s)'] == VNT_KL_value) &
-        (df['@wwidth_B'] == WW_B_value) & (df['@wwidth_KL'] == WW_KL_value) & (df['@c_glazed'] == G_value)
-    ]
-    EP_JOB_ID = df_EP_JOB.iloc[0]['job_id']
-    print(EP_JOB_ID)
-
-    # EPLUS - HOURLY SIMRES
-    df_ep_hr = query_sqlite_simres_hr_job_id(
-        db_folder=str(SIM_JOBS),
-        db_name=D_F,
-        table=D_F,
-        job_id=EP_JOB_ID,
-        )
-    # df_ep_hr = df_ep_hr[df['job_id']==EP_JOB_ID]
-    df_ep_hr.index = pd.to_datetime(df_ep_hr.index)
-    df_ep_hr = df_ep_hr[datetime(1989, range_month[0], 1):datetime(1989,range_month[1],30)]
+    D_F_W = '{}_{}_{}'.format(D_value, F_value, W_value)
     #
-    traces_hr = dash_HR_add_traces_EP(df_ep_hr=df_ep_hr, room=room, dash_style='dot')
+    table = '{}_{}_HR'.format(D, SIM_JOBS)
+    df_ep_hr = pd.read_sql_query(
+        con = app.db_conn,
+        sql = """SELECT * FROM {table}
+            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+            AND `{Ncol}` = '{N}'
+            AND `{vBcol}` = '{VNT_B}' AND `{vKLcol}` = '{VNT_KL}'
+            AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
+            AND `{Gcol}` = '{G}'
+            ;""".format(
+                table=table,
+                Wcol=Wcol, W=W_value,   Fcol=Fcol, F=F_value, Ncol=Ncol, N=N_value,
+                vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
+                wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
+                Gcol=Gcol, G=G_value,
+                ),
+        )
+    df_ep_hr['datetime'] = pd.to_datetime(df_ep_hr['datetime'])
+    df_ep_hr.set_index('datetime', inplace=True)
+    df_ep_hr.sort_index(axis=0, inplace=True)
+    #    
+    df_ep_hr = df_ep_hr[start_date:end_date]
+    print(df_ep_hr.shape)
+    #
+    traces_hr = dash_HR_add_traces_EP(
+        df=df_ep_hr,
+        group='ROASST',
+        room=room,
+        linewidth=1.5,
+        )
 
-    # IES - HOURLY SIMRES
+    traces_hr += dash_HR_add_traces_EXT(
+        df=df_ep_hr,
+        group='EXT',
+        linewidth=1.5,
+        )    
+
+    # print(df_ep_hr['TM59_Tmax'][:5])
+
+#####
+
+    # DBS - HOURLY SIMRES
     try:
-        D_F_W = '{}_{}'.format(D_F, W_value)
-        D_F_W_N = '{}_N{}'.format(D_F_W, N_value)
-        df_ies_hr = query_sqlite_simres_hr(
-            db_folder='IES',
-            db_name='IES_'+D_F_W, table=D_F_W_N,
+        # SQLite (superseded)
+        # file = 'DSB/DSB_{}_HR.sqlite'.format(D)
+        # conn_sqlite = app.db_connnector(file=file)
+        table = 'DSBYZ_{}_HR'.format(D)
+        df_dsb_hr = pd.read_sql_query(
+            con = app.db_conn,
+            sql = """SELECT * FROM {table}
+            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
+            """.format(
+                table=table,
+                Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
+                )
             )
-        df_ies_hr.index = pd.to_datetime(df_ies_hr.index)
-        df_ies_hr = df_ies_hr[datetime(1989, range_month[0], 1):datetime(1989,range_month[1],30)]
-        traces_hr += dash_HR_add_traces_IES(df_ies_hr=df_ies_hr, room=room, dash_style='dot')
+        df_dsb_hr['datetime'] = pd.to_datetime(df_dsb_hr['datetime'])
+        df_dsb_hr.set_index('datetime', inplace=True)
+        #
+        df_dsb_hr = df_dsb_hr[start_date:end_date]
+        #
+        traces_hr += dash_HR_add_traces(
+            df=df_dsb_hr,
+            group='DSBYZ',
+            room=room,
+            linewidth=1.2,
+            dash_style='dashdot'
+            )
+    except:
+        'Do nothing'
+    print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
+
+#####
+    # IES - HOURLY SIMRES    
+    D_F_W_N = '{}_{}_{}_{}'.format(D_value, F_value, W_value, N_value)
+    try:
+        table = 'IES_{}_HR'.format(D)
+        df_ies_hr = pd.read_sql_query(
+            con = app.db_conn,
+            sql = """SELECT * FROM {table}
+            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
+            """.format(
+                table=table,
+                Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
+                )
+            )
+        df_ies_hr['datetime'] = pd.to_datetime(df_ies_hr['datetime'])
+        df_ies_hr.set_index('datetime', inplace=True)
+        df_ies_hr = df_ies_hr[start_date:end_date]
+        #
+        traces_hr += dash_HR_add_traces(
+            df=df_ies_hr,
+            group='IES',
+            room=room,
+            linewidth=1.2,
+            dash_style='dot',
+            )
     except:
         'Do nothing'
     print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
@@ -221,7 +284,6 @@ def update_chart_scatter_hr(
 
     #####
     layout_hr = create_layout_EP_IES_HR(D_value=D_value, F_value=F_value, room=room)
-
     fig_hr = go.Figure(
         data=traces_hr,
         layout=layout_hr,

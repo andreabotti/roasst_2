@@ -17,10 +17,14 @@ seaborn = "*"
 cufflinks = "*"
 dash-renderer = "*"
 ipython = "*"
+sqlalchemy = "*"
+alembic = "*"
+pymysql = "*"
 
 
 [dev-packages]
 
+ipdb = "*"
 
 
 [requires]
