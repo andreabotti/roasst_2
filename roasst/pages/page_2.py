@@ -10,10 +10,8 @@ import datetime as dt
 from roasst.app import app
 from roasst import urls
 from ..config import *
-from ..modules import *
 from ..menus import *
 from roasst.pages.charts_HR import *
-from ..db import roasst_mysql_engine
 from roasst.pages.page_title import page_title
 
 
@@ -21,8 +19,8 @@ from roasst.pages.page_title import page_title
 
 #####
 bar_width = 0.8
-bar_gap = 1;
-bar_group_gap = 0;
+bar_gap = 1
+bar_group_gap = 0
 bar_mode = 'group'
 #
 colors_dict = {
@@ -36,15 +34,10 @@ colors_dict = {
 
 # I need to query one database with simulation results to populate the menus
 D = DWELLINGS[0]
-SIM_TOOL, SIM_JOBS, RVX = 'JESS', 216, 'EMS_HR_RP'
-sqlite_con = sqlite3.connect(
-    os.path.join(
-        DATA_FOLDER_PATH,
-        'ALL_{}_HR.sqlite'.format(SIM_JOBS),
-        )
-    )
+SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
+
 table = '{}_{}_SJI'.format(D, SIM_JOBS)
-df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),sqlite_con)
+df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),app.db_conn)
 #
 
 
@@ -114,11 +107,9 @@ def set_vnt_KL_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    
-    df_sji = sqlite_get_sji(
-        file='ALL_{}_HR.sqlite'.format(SIM_JOBS),
-        table='{}_{}_SJI'.format(D, SIM_JOBS),
-        )
+    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
+
     #
     VNT_KL_list = df_sji[vKLcol].unique()
     VNT_KL_options = [{'label': '{}'.format(int(1000*x)), 'value': x} for x in VNT_KL_list ]
@@ -139,11 +130,9 @@ def set_vnt_B_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
+    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
 
-    df_sji = sqlite_get_sji(
-        file='ALL_{}_HR.sqlite'.format(SIM_JOBS),
-        table='{}_{}_SJI'.format(D, SIM_JOBS),
-        )
     #
     VNT_B_list = df_sji[vBcol].unique()
     VNT_B_options = [{'label': '{}'.format(int(1000*x)), 'value': x} for x in VNT_B_list ]
@@ -192,9 +181,8 @@ def update_chart_scatter_hr(
     D_F_W = '{}_{}_{}'.format(D_value, F_value, W_value)
     #
     table = '{}_{}_HR'.format(D, SIM_JOBS)
-    conn_sqlite = sqlite_connector( file='ALL_{}_HR.sqlite'.format(SIM_JOBS) )
     df_ep_hr = pd.read_sql_query(
-        con = conn_sqlite,
+        con = app.db_conn,
         sql = """SELECT * FROM {table}
             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
             AND `{Ncol}` = '{N}'
@@ -237,10 +225,10 @@ def update_chart_scatter_hr(
     try:
         # SQLite (superseded)
         # file = 'DSB/DSB_{}_HR.sqlite'.format(D)
-        # conn_sqlite = sqlite_connector(file=file)
+        # conn_sqlite = app.db_connnector(file=file)
         table = 'DSBYZ_{}_HR'.format(D)
         df_dsb_hr = pd.read_sql_query(
-            con = conn_mysql,
+            con = app.db_conn,
             sql = """SELECT * FROM {table}
             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
             """.format(
@@ -268,13 +256,9 @@ def update_chart_scatter_hr(
     # IES - HOURLY SIMRES    
     D_F_W_N = '{}_{}_{}_{}'.format(D_value, F_value, W_value, N_value)
     try:
-        # SQLite (superseded)
-        # file = 'IES/IES_{}_HR.sqlite'.format(D)
-        # conn_sqlite = sqlite_connector(file=file)
-        #
         table = 'IES_{}_HR'.format(D)
         df_ies_hr = pd.read_sql_query(
-            con = conn_mysql,
+            con = app.db_conn,
             sql = """SELECT * FROM {table}
             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
             """.format(
