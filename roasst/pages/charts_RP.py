@@ -1,6 +1,9 @@
 # other libraries
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rcdefaults()
+
 # import seaborn as sns
 import cufflinks as cf
 from pandas import *

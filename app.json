@@ -1,0 +1,13 @@
+{
+  "name": "Roasst",
+  "description": "",
+  "image": "heroku/python",
+  "repository": "https://github.com/andreabotti/roasst_2",
+  "keywords": ["python", "dash" ],
+  "environments": {
+    "test": {
+      "scripts": {
+      }
+    }
+  }
+}

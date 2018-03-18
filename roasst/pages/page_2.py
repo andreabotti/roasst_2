@@ -226,7 +226,7 @@ def update_chart_scatter_hr(
         # SQLite (superseded)
         # file = 'DSB/DSB_{}_HR.sqlite'.format(D)
         # conn_sqlite = app.db_connnector(file=file)
-        table = 'DSBYZ_{}_HR'.format(D)
+        table = 'DSB_{}_HR'.format(D)
         df_dsb_hr = pd.read_sql_query(
             con = app.db_conn,
             sql = """SELECT * FROM {table}

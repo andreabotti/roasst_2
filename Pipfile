@@ -20,6 +20,8 @@ ipython = "*"
 sqlalchemy = "*"
 alembic = "*"
 pymysql = "*"
+gunicorn = "*"
+matplotlib = "*"
 
 
 [dev-packages]
