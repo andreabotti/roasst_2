@@ -119,10 +119,10 @@ def dash_create_menu_floor(df, col, menu_id, width):
     # F radio
     return html.Div(
         className='{} columns'.format(width),
-        style={
-            'margin': '0 0 0 0',
-            'padding': '0 0 0 0',
-        },
+        # style={
+        #     'margin': '0 0 0 0',
+        #     'padding': '0 0 0 0',
+        # },
         children=[
             html.H6('FLOOR'),
             dcc.RadioItems(
@@ -273,7 +273,7 @@ def dash_create_menu_datepickerrange(width):
         className='{} columns'.format(width),
         style={'fontSize': 12},
         children=[
-            html.H6('Date'),
+            html.H6('DATE'),
             dcc.DatePickerRange(
                 id='date_picker_range',
                 start_date=dt(1989, 5, 1),
@@ -283,6 +283,19 @@ def dash_create_menu_datepickerrange(width):
                 # with_portal=True,
                 # calendar_orientation='vertical',
             )
+        ]
+    )
+
+
+def dash_create_menu_textinput(menu_id, width):
+    return html.Div(
+        className='{} columns'.format(width),
+        style={'fontSize': 12},
+        children=[
+            html.H6('TRACES'),
+            dcc.Input(id=menu_id[0], value='', type='text'),
+            dcc.Input(id=menu_id[1], value='', type='text'),
+            dcc.Input(id=menu_id[2], value='', type='text'),
         ]
     )
 

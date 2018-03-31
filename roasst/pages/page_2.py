@@ -2,10 +2,6 @@ import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
 
-# ROASST
-# from dash_utils.dash_lib_sql_query import *
-# from dash_utils.dash_lib_viz_menus import *
-# from dash_utils.dash_lib_viz_charts_HR import *
 
 from roasst.app import app
 from roasst import urls
@@ -35,8 +31,9 @@ colors_dict = {
 # I need to query one database with simulation results to populate the menus
 D = DWELLINGS[0]
 SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
+SHOW_IES = False
 
-table = '{}_{}_SJI'.format(D, SIM_JOBS)
+table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),app.db_conn)
 #
 
@@ -48,22 +45,38 @@ input_menus = html.Div(
         'font-size':13,
         },
     children=[
-        dash_create_menu_unit(menu_id='D_input(p2)',
-            width='two', menu_type='radio', DWELLINGS=DWELLINGS),
-        dash_create_menu_weather(menu_id=['W1_input(p2)','W2_input(p2)'], widths=['one','one'],
-            WEATHER_FILES=WEATHER_FILES),
+        dash_create_menu_unit(
+            menu_id='D_input(p2)',
+            width='one', menu_type='radio', DWELLINGS=DWELLINGS,
+            ),
+        dash_create_menu_weather(
+            menu_id=['W1_input(p2)','W2_input(p2)'],
+            widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
+            ),
         dash_create_menu_floor(menu_id='F_input(p2)', col=Fcol,
-            width='one', df=df_sji),
+            width='one', df=df_sji,
+            ),
         dash_create_menu_north(menu_id='N_input(p2)', col=Ncol,
-            width='one', df=df_sji),
+            width='one', df=df_sji,
+            ),
         dash_create_menu_vnt(menu_id=['VNT_KL_input(p2)','VNT_B_input(p2)'],
-            cols=[vBcol,vKLcol], width='two', df=df_sji),
+            cols=[vBcol,vKLcol], width='two', df=df_sji,
+            ),
         dash_create_menu_window_width(menu_id=['WW_KL_input(p2)','WW_B_input(p2)'],
-            cols=[wwBcol,wwKLcol], width='one', df=df_sji),
+            cols=[wwBcol,wwKLcol], width='one', df=df_sji,
+            ),
         dash_create_menu_glazing(menu_id='G_input(p2)', col=Gcol,
-            width='one', df=df_sji),
+            width='one', df=df_sji,
+            ),
         dash_create_menu_rooms(menu_id='R_input(p2)', width='one', ROOMS=ROOMS),
         dash_create_menu_datepickerrange(width='one'),
+        dash_create_menu_textinput(
+            menu_id=[
+                'trace_group_1_input(p2)',
+                'trace_group_2_input(p2)',
+                'trace_group_3_input(p2)',
+            ],
+            width='one'),
         ],
     )
 
@@ -73,7 +86,7 @@ chart1 = html.Div(
         dcc.Graph(
             id='scatter_hr',
             figure={},
-            style={'height': '750px'},
+            style={'height': '680px'},
             ),
         ],
 )
@@ -107,7 +120,7 @@ def set_vnt_KL_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
     df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
 
     #
@@ -118,8 +131,7 @@ def set_vnt_KL_options(D_value, F_value):
     Output('VNT_KL_input(p2)', 'value'),
     [Input('VNT_KL_input(p2)', 'options')]
 )
-def set_vnt_KL_value(available_options):
-    return available_options[0]['value'], 
+
 #
 @app.callback(
     Output('VNT_B_input(p2)', 'options'),
@@ -130,7 +142,7 @@ def set_vnt_B_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
     df_sji = pd.read_sql_query('SELECT * FROM {};'.format(table), app.db_conn)
 
     #
@@ -141,9 +153,13 @@ def set_vnt_B_options(D_value, F_value):
     Output('VNT_B_input(p2)', 'value'),
     [Input('VNT_B_input(p2)', 'options')]
 )
+#
+def set_vnt_KL_value(available_options):
+    return available_options[0]['value'] 
+#
 def set_vnt_B_value(available_options):
-    value = available_options[0]
-    return value, 
+    return available_options[0]['value']
+
 
 
 #####
@@ -158,7 +174,9 @@ def set_vnt_B_value(available_options):
         Input('WW_B_input(p2)', 'value'), Input('WW_KL_input(p2)', 'value'),
         Input('G_input(p2)', 'value'), Input('R_input(p2)', 'value'),
         Input('date_picker_range', 'start_date'), Input('date_picker_range', 'end_date'),
-        # Input('RangeSlider_month', 'value'),
+        Input('trace_group_1_input(p2)', 'value'),
+        Input('trace_group_2_input(p2)', 'value'),
+        Input('trace_group_3_input(p2)', 'value'),
     ]
     )
 
@@ -169,6 +187,7 @@ def update_chart_scatter_hr(
     VNT_B_value, VNT_KL_value, WW_B_value, WW_KL_value,
     G_value, room,
     start_date, end_date,
+    trace_group_1, trace_group_2, trace_group_3, 
     ):
     traces_hr = []
     import time
@@ -180,7 +199,7 @@ def update_chart_scatter_hr(
     W_value = '{}{}'.format(W1_value, W2_value)
     D_F_W = '{}_{}_{}'.format(D_value, F_value, W_value)
     #
-    table = '{}_{}_HR'.format(D, SIM_JOBS)
+    table = 'OSJE_{}_{}_HR'.format(D, SIM_JOBS)
     df_ep_hr = pd.read_sql_query(
         con = app.db_conn,
         sql = """SELECT * FROM {table}
@@ -217,69 +236,71 @@ def update_chart_scatter_hr(
         linewidth=1.5,
         )    
 
-    # print(df_ep_hr['TM59_Tmax'][:5])
 
 #####
 
     # DBS - HOURLY SIMRES
-    try:
-        # SQLite (superseded)
-        # file = 'DSB/DSB_{}_HR.sqlite'.format(D)
-        # conn_sqlite = app.db_connnector(file=file)
-        table = 'DSB_{}_HR'.format(D)
-        df_dsb_hr = pd.read_sql_query(
-            con = app.db_conn,
-            sql = """SELECT * FROM {table}
-            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
-            """.format(
-                table=table,
-                Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
+    i = 0
+    dict_line = {1:'dot', 2:'dash', 3:'dashdot'}
+    for trace_group in [trace_group_1, trace_group_2, trace_group_3]:
+        i=i+1
+
+        try:
+            table = '{}_{}_24_HR'.format(trace_group, D) if 'JE' in trace_group \
+                else '{}_{}_HR'.format(trace_group, D)
+            
+            df_hr = pd.read_sql_query(
+                con = app.db_conn,
+                sql = """SELECT * FROM {table}
+                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
+                """.format(table=table, Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value)
                 )
-            )
-        df_dsb_hr['datetime'] = pd.to_datetime(df_dsb_hr['datetime'])
-        df_dsb_hr.set_index('datetime', inplace=True)
-        #
-        df_dsb_hr = df_dsb_hr[start_date:end_date]
-        #
-        traces_hr += dash_HR_add_traces(
-            df=df_dsb_hr,
-            group='DSBYZ',
-            room=room,
-            linewidth=1.2,
-            dash_style='dashdot'
-            )
-    except:
-        'Do nothing'
-    print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
+            df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
+            df_hr.set_index('datetime', inplace=True)
+            df_hr = df_hr[start_date:end_date]
+            #
+            traces_hr += dash_HR_add_traces(
+                df=df_hr,
+                group=trace_group,
+                room=room,
+                linewidth=1.2,
+                dash_style=dict_line[i],
+                )
+        except:
+            'Do nothing'
+        print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
+
 
 #####
+
     # IES - HOURLY SIMRES    
     D_F_W_N = '{}_{}_{}_{}'.format(D_value, F_value, W_value, N_value)
-    try:
-        table = 'IES_{}_HR'.format(D)
-        df_ies_hr = pd.read_sql_query(
-            con = app.db_conn,
-            sql = """SELECT * FROM {table}
-            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
-            """.format(
-                table=table,
-                Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
+    if SHOW_IES==True:
+        try:
+            table = 'IES_{}_HR'.format(D)
+            df_ies_hr = pd.read_sql_query(
+                con = app.db_conn,
+                sql = """SELECT * FROM {table}
+                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
+                """.format(
+                    table=table,
+                    Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
+                    )
                 )
-            )
-        df_ies_hr['datetime'] = pd.to_datetime(df_ies_hr['datetime'])
-        df_ies_hr.set_index('datetime', inplace=True)
-        df_ies_hr = df_ies_hr[start_date:end_date]
-        #
-        traces_hr += dash_HR_add_traces(
-            df=df_ies_hr,
-            group='IES',
-            room=room,
-            linewidth=1.2,
-            dash_style='dot',
-            )
-    except:
-        'Do nothing'
-    print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
+            df_ies_hr['datetime'] = pd.to_datetime(df_ies_hr['datetime'])
+            df_ies_hr.set_index('datetime', inplace=True)
+            df_ies_hr = df_ies_hr[start_date:end_date]
+            #
+            traces_hr += dash_HR_add_traces(
+                df=df_ies_hr,
+                group='IES',
+                room=room,
+                linewidth=1.2,
+                dash_style='dot',
+                )
+        except:
+            'Do nothing'
+        print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
 
 
     #####

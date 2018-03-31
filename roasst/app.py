@@ -4,7 +4,9 @@ import dash
 import plotly
 from sqlalchemy import create_engine
 
-from roasst.config import PLOTLY_USERNAME, PLOTLY_API_KEY
+# from roasst.config import PLOTLY_USERNAME, PLOTLY_API_KEY
+PLOTLY_USERNAME = 'a.botti'
+PLOTLY_API_KEY = 'MpDq2yINla4zb0TUd7qo'
 
 plotly.tools.set_credentials_file(username=PLOTLY_USERNAME, api_key=PLOTLY_API_KEY)
 

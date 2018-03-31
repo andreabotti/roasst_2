@@ -242,8 +242,9 @@ def dash_HR_add_traces_EP(df, group, room, linewidth):
 def create_layout_EP_IES_HR(D_value, F_value, room):
     
     layout_hr = go.Layout(
-        title='EP-IES comparison for<br>' \
-        '<i>unit</i>: <b>{}</b> | <i>floor</i>: <b>{}</b> |  <i>room</i>: <b>{}</b>'.format(D_value,F_value,room),
+        margin=go.Margin(l=60, r=40, b=40, t=40),
+        title='<i>unit</i>: <b>{D}</b> | <i>floor</i>: <b>{F}</b>' \
+            ' |  <i>room</i>: <b>{R}</b>'.format(D=D_value,F=F_value,R=room),
         yaxis1=dict(
             domain=[0, 0.12], range=[0,8], dtick=2, showgrid=False,
             #

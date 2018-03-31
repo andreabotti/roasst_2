@@ -1,8 +1,7 @@
+import os, sys
 import pandas as pd, numpy as np
 from pandas import *
 #
-import statsmodels.formula.api as sm
-from statsmodels.stats.stattools import (jarque_bera, omni_normtest, durbin_watson)
 
 
 # PLOTLY
@@ -18,23 +17,17 @@ import dash_html_components as html
 import dash_table_experiments as dt
 
 # ROASST
-from dash_utils._main_settings import *
-from dash_utils.dash_lib_viz_menus import *
-from dash_utils.dash_lib_viz_charts_RP import *
-
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+from config import *
+from menus import *
+from page_title import page_title
+from charts_RP import *
+from app import *
 
 
 #####
-sim_choice, SIM_JOBS = 'JEPLUS', 8    #72
-
-#
-if sim_choice == 'JEPLUS':
-    SIM_OUT_PATH = SIM_OUT_PATH_JEPLUS
-if sim_choice == 'JESS':
-    SIM_OUT_PATH = SIM_OUT_PATH_JESS
-
-
-#
 NORTH = [0,45,90,135,180,225,270,315]
 N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
 #
@@ -86,131 +79,109 @@ def assign_trace_fill_outline(U, R):
 
 
 
-#####
-df_ep_rp_allunits = pd.DataFrame()
+# I need to query one database with simulation results to populate the menus
+D = 'P1201'
+SIM_TOOL, SIM_JOBS, RVX = 'JESS', 864, 'EMS_RP'
+table = 'ALL_{}_SJI'.format(SIM_JOBS)
+df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 
-for U in UNITS:
-    sep = '-'*30
-    print('\n{}\nUNIT: {}  |  SimJobs:{}\n'.format(sep,U,SIM_JOBS))
-    for W in WEATHER_FILES:
-        for F in FLOORS:
-            #
-            U_F_W = '{}_{}_{}'.format(U, F, W)
-            U_F_W_SIMS = '{}_{}'.format(U_F_W, SIM_JOBS)
-
-            # RUNPERIOD RESULTS
-            SIMRES_DB_EP_RP = os.path.join(SIM_OUT_PATH, U, U_F_W_SIMS, '{}_RP.sqlite.csv'.format(U_F_W_SIMS))
-            SQLITE_DB_IES_RP = os.path.join(MAIN_FOLDER, '2_SIMRES/IES/', '{}_RP.sqlite'.format(U_F_W))
-            df_sji = query_sqlite_sji(
-                db=SIMRES_DB_EP_RP,
-                table='SimJobIndex',
-                )
-            # print('# Querying databases (RP):\n\t{}\n\t{}\n'.format(SIMRES_DB_EP_RP, SQLITE_DB_IES_RP) )
-
-            df_ep_rp = query_sqlite_simres_rp(
-                db=SIMRES_DB_EP_RP,
-                table=U_F_W_SIMS,
-                )
-            #
-            df_ep_rp['@weather'] = W
-            df_ep_rp_allunits = pd.concat([df_ep_rp_allunits, df_ep_rp], axis=0)
-#
-df_ep_rp_allunits['@unit'] = [i.split('_')[1] for i in df_ep_rp_allunits.index]
-print(df_ep_rp_allunits.shape)
 
 
 #####
 
-
-# DASH APP
 app = dash.Dash()
 app.config.supress_callback_exceptions = True
 # CSS
 external_css = ["https://fonts.googleapis.com/css?family=Overpass:300,300i",
-                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/dab6f937fd5548cebf4c6dc7e93a10ac438f5efb/dash-technical-charting.css"]
+                "https://cdn.rawgit.com/plotly/dash-app-stylesheets/dab6f937fd5548cebf4c6dc7e93a10ac438f5efb/dash-technical-charting.css",
+                ]
 [app.css.append_css({"external_url": css}) for css in external_css]
 if 'DYNO' in os.environ:
     app.scripts.append_script({'external_url': 'https://cdn.rawgit.com/chriddyp/ca0d8f02a1659981a0ea7f013a378bbd/raw/e79f3f789517deec58f41251f7dbb6bee72c44ab/plotly_ga.js'})
 
 
-#
-app.layout = html.Div(
-[
-    html.Div([
-        html.H4('ROASST App 3 - UNIT COMPARISON (RunPeriod)'),
-        ],
-        className='row',        
-        style={
-            'background-color': '#F3F3F3',
-            'font-family': 'overpass',
-            'width': '98%',
-            'margin': '0 0 0 0', 'padding': '20', 'padding-top': '10', 'padding-bottom': '0',
-            },
-        ),
+#####
 
-    html.Div([
-        dash_create_menu_unit(UNITS=UNITS, menu_type='dropdown', cols='two'),
-        dash_create_menu_weather(WEATHER_FILES=WEATHER_FILES, cols='two'),
-        dash_create_menu_floor(df=df_sji),
-        dash_create_menu_vnt(df=df_sji),
-        dash_create_menu_window_width(df=df_sji),
-        dash_create_menu_glazing(df=df_sji),
-        dash_create_menu_OH_metric(),
+input_menus = html.Div(
+    className='row',
+    style={
+        'margin': '0 0 0 0', 'padding': '10',
+        'font-size': 13,
+    },
+    children=[
+        dash_create_menu_unit(menu_id='D_input(p3)',
+                              width='two', menu_type='radio', DWELLINGS=DWELLINGS),
+        dash_create_menu_weather(menu_id=['W1_input(p3)', 'W2_input(p3)'], widths=['one', 'one'],
+                                 WEATHER_FILES=WEATHER_FILES),
+        dash_create_menu_floor(menu_id='F_input(p3)', col=Fcol,
+                               width='one', df=df_sji),
+        # dash_create_menu_north(menu_id='N_input(p3)',  width='one',
+        #     df=df_sji,),
+        dash_create_menu_vnt(menu_id=['VNT_KL_input(p3)', 'VNT_B_input(p3)'],
+                             cols=[vBcol, vKLcol], width='two', df=df_sji),
+        dash_create_menu_window_width(menu_id=['WW_KL_input(p3)', 'WW_B_input(p3)'],
+                                      cols=[wwBcol, wwKLcol], width='one', df=df_sji),
+        dash_create_menu_glazing(menu_id='G_input(p3)', col=Gcol,
+                                 width='one', df=df_sji),
+        # dash_create_menu_rooms(menu_id='R_input(p3)', width='one', ROOMS=ROOMS),
+        # dash_create_menu_daterange(width='one'),
+    ],
+)
+#
+
+chart_KL = html.Div(
+    # className='six columns',
+    style={'padding': '10 10 10 10'},
+    children=[
+        dcc.Graph(
+            style={'height': '700px'},
+            id='chart_bars_KL',
+            figure={},
+            ),
         ],
+    ),
+chart_BD1 = html.Div(
+    className='six columns',
+    style={'padding': '10 10 10 10'},
+    children=[
+        dcc.Graph(
+            style={'height': '700px'},
+            id='chart_bars_BD1',
+            figure={},
+            ),
+        ],
+    ),
+charts = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
         'font-family': 'overpass',
-        'width': '90%',
-        'margin': '0 0 0 0', 'padding': '10', 'padding-top': '10', 'padding-bottom': '0',
+        'width': '100%',
+        'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
         },
-    ),
+    children=[
+        chart_KL,
+        # chart_BD1,
+        ],
+    )
 
-    html.Hr(),
 
-    html.Div([
-        # html.Label('OVERHEATING RISK FOR BEDROOM1 (TM52_C1)'),
-        html.Div([
-            dcc.Graph(
-                style={'height': '700px'},
-                id='chart_bars_KL',
-                figure=plotly.tools.make_subplots(
-                    rows=3, cols=3,
-                    shared_xaxes=False, shared_yaxes=False,
-                    horizontal_spacing=0.1,
-                    vertical_spacing=0.15,
-                    subplot_titles=('NW','N','NE','W','PLANS','E','SW','S','SE')
-                    ),
-            ),
-        ], className='six columns', style={'padding': '10 10 10 10'},
-        ),
-        html.Div([
-            dcc.Graph(
-                style={'height': '700px'},
-                id='chart_bars_BD1',
-                figure=plotly.tools.make_subplots(
-                    rows=3, cols=3,
-                    shared_xaxes=False, shared_yaxes=False,
-                    horizontal_spacing=0.1,
-                    vertical_spacing=0.15,
-                    subplot_titles=('NW','N','NE','W','PLANS','E','SW','S','SE')
-                    ),
-            ),
-        ], className='six columns', style={'padding': '10 10 10 10'},
-        ),
-    ], className='row',
-    # style={'padding': '10 10 10 10'},
-    ),    
-    
-],
-style={
-    # 'background-color': '#F3F3F3',
-    'font-family': 'overpass',
-    'width': '100%',
-    'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
-},
-)
-
+#####
+app.layout = html.Div(
+    className='row',
+    style={
+        # 'background-color': '#F3F3F3',
+        'font-family': 'overpass',  # 'font-size':11,
+        'height': '1000px', 'width': '100%',    # 'max-width': '1800',
+        'margin': '20 0 0 0', 'padding': '0 0 0 0',
+        },
+    children = [
+        page_title,
+        input_menus,
+        html.Hr(),
+        charts,
+        ],
+    )
 
 
 #####
@@ -219,12 +190,12 @@ style={
 @app.callback(
     Output('chart_bars_KL', 'figure'),
     [
-    Input('U_input', 'value'),
-    Input('W1_input', 'value'), Input('W2_input', 'value'),
-    Input('F_input', 'value'),
-    Input('VNT_B_input', 'value'), Input('VNT_KL_input', 'value'),
-    Input('WW_B_input', 'value'), Input('WW_KL_input', 'value'), Input('G_input', 'value'),
-    Input('crit_input', 'value'),
+    Input('D_input(p3)', 'value'),
+    Input('W1_input(p3)', 'value'), Input('W2_input(p3)', 'value'),
+    Input('F_input(p3)', 'value'),
+    Input('VNT_B_input(p3)', 'value'), Input('VNT_KL_input(p3)', 'value'),
+    Input('WW_B_input(p3)', 'value'), Input('WW_KL_input(p3)', 'value'), Input('G_input(p3)', 'value'),
+    Input('crit_input(p3)', 'value'),
     ])
 
 def update_chart_bar_runperiod_KL(
@@ -267,12 +238,27 @@ def update_chart_bar_runperiod_KL(
 
     N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
     #    
-    U_value = [U_value] if type(U_value).__name__ == 'str' else U_value    
+    D_value = [D_value] if type(D_value).__name__ == 'str' else D_value
     W_value = '{}{}'.format(W1_value, W2_value)
-    print(W_value)
+    #
+    table = 'ALL_{}_RP'.format(D, SIM_JOBS)
+    df_ep_rp = pd.read_sql_query(
+        con=app.db_conn,
+        sql="""SELECT * FROM {table}
+            WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+            AND `{vBcol}` = '{VNT_B}' AND `{vKLcol}` = '{VNT_KL}'
+            AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
+            AND `{Gcol}` = '{G}'
+            ;""".format(
+            table=table,
+            Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+            vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
+            wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
+            Gcol=Gcol, G=G_value,
+        ),
+    )
+    print('df_ep_rp: {}'.format(df_ep_rp.shape))
 
-    df = df_ep_rp_allunits
-    df = df[ df['@weather']==W_value ]
 
     for N in NORTH:
         df_N = df[ df['@north']==N ]
@@ -283,17 +269,21 @@ def update_chart_bar_runperiod_KL(
         # print(row, col)
         #####
     
-        df_U = pd.DataFrame()
-        for U in U_value:
+        df_D = pd.DataFrame()
+        for D in D_value:
+            F = F_value;
+            D_F = '{}_{}'.format(D, F_value)
+            
+
             # print(U)
-            sel = df_N[ df_N['@unit']==U ]
-            df_U = pd.concat([df_U, sel], axis=0)
+            sel = df_N[ df_N['@unit']==D ]
+            df_D = pd.concat([df_D, sel], axis=0)
 
             x = sel['{}_{}'.format(R, crit_value)]*100
             y = sel['@unit']
-            trace_name = '{}|{}'.format(U,R)
+            trace_name = '{}|{}'.format(D,R)
             # x = trace_name
-            trace_fill, trace_outline = assign_trace_fill_outline(U=U, R=R)
+            trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
             trace_bar = go.Bar(
                 x=x,
                 y=y,

@@ -4,11 +4,6 @@ import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
 
-# ROASST
-# from dash_utils.dash_lib_viz_menus import *
-# from dash_utils.dash_lib_viz_charts_RP import *
-
-
 from roasst.app import app
 from roasst.config import *
 from roasst.menus import *
@@ -45,7 +40,7 @@ colors_dict = {
 # I need to query one database with simulation results to populate the menus
 D = 'P2302'
 SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
-table = '{}_{}_SJI'.format(D, SIM_JOBS)
+table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 #
 
@@ -116,7 +111,7 @@ def set_vnt_KL_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
     df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 
     #
@@ -130,7 +125,7 @@ def set_vnt_KL_options(D_value, F_value):
     [Input('VNT_KL_input(p1)', 'options')]
 )
 def set_vnt_KL_value(available_options):
-    return available_options[0]['value'],
+    return available_options[0]['value']
 
 
 #
@@ -143,7 +138,7 @@ def set_vnt_B_options(D_value, F_value):
     D = D_value
     F = F_value
     D_F = '{}_{}'.format(D_value, F_value)
-    table = '{}_{}_SJI'.format(D, SIM_JOBS)
+    table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
     df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 
     #
@@ -157,7 +152,7 @@ def set_vnt_B_options(D_value, F_value):
     [Input('VNT_B_input(p1)', 'options')]
 )
 def set_vnt_B_value(available_options):
-    return available_options[0]['value'],
+    return available_options[0]['value']
 
 
 #####
@@ -191,8 +186,8 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
     D_F = '{}_{}'.format(D_value, F_value)
     W_value = '{}{}'.format(W1_value, W2_value)
     #
-    file = 'ALL_{}_RP.sqlite'.format(SIM_JOBS)
-    table = '{}_{}_RP'.format(D, SIM_JOBS)
+    # file = 'ALL_{}_RP.sqlite'.format(SIM_JOBS)
+    table = 'OSJE_{}_{}_RP'.format(D, SIM_JOBS)
     df_ep_rp = pd.read_sql_query(
         con=app.db_conn,
         sql="""SELECT * FROM {table}
@@ -257,14 +252,14 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
                     bar_width=bar_width, outline_width=1.3,
                     colors_dict=colors_dict, all_traces=all_traces,
                 )
-            print('IES traces added')
+            print('Could not retrieve table: {}'.format(table))
     except:
         'Do nothing'
 
     #####
 
     try:
-        table = 'DSBYZ_{}_RP'.format(D)
+        table = 'DSB_{}_RP'.format(D)
         df_dsb_rp = pd.read_sql_query(
             con=app.db_conn,
             sql="""SELECT * FROM {table}
@@ -294,7 +289,7 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
                 )
             print('DSB traces added')
     except:
-        'Do nothing'
+        print('Could not retrieve table: {}'.format(table))
 
         print('\t\t%s seconds' % (time.time() - start_time))
 
@@ -346,7 +341,7 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
         ),
         xaxis6=dict(
             domain=[0.85, 1],
-            range=[20, 0], dtick=2,
+            range=[30, 0], dtick=2,
             showgrid=True,
             title=r'TM59 Ca (%)',
         ),
