@@ -22,17 +22,25 @@ bar_group_gap = 0;
 bar_mode = 'group'
 #
 colors_dict = {
-    'HG_EP': 'rgba(255, 0, 0, 0.8)',
-    'HG_IES': 'rgba(255, 0, 0, 0.6)', 'HG_DSB': 'rgba(255, 0, 0, 0.45)',
+    'HG_OSJE': 'rgba(255, 0, 0, 0.8)',
+    'HG_IES': 'rgba(255, 0, 0, 0.6)',
+    'HG_DSB': 'rgba(255, 0, 0, 0.45)',
+    'HG_DSBJE': 'rgba(255, 0, 0, 0.45)',
     #
-    'HL_EP': 'rgba(120, 163, 206, 0.8)',
-    'HL_IES': 'rgba(120, 163, 206, 0.6)', 'HL_DSB': 'rgba(120, 163, 206, 0.45)',
+    'HL_OSJE': 'rgba(120, 163, 206, 0.8)',
+    'HL_IES': 'rgba(120, 163, 206, 0.6)',
+    'HL_DSB': 'rgba(120, 163, 206, 0.45)',
+    'HL_DSBJE': 'rgba(120, 163, 206, 0.45)',
     #
-    'VNT_EP': 'rgba(120, 163, 206, 0.8)',
-    'VNT_IES': 'rgba(120, 163, 206, 0.6)', 'VNT_DSB': 'rgba(120, 163, 206, 0.45)',
+    'VNT_OSJE': 'rgba(120, 163, 206, 0.8)',
+    'VNT_IES': 'rgba(120, 163, 206, 0.6)',
+    'VNT_DSB': 'rgba(120, 163, 206, 0.45)',
+    'VNT_DSBJE': 'rgba(120, 163, 206, 0.45)',
     #
-    'OH_EP': 'rgba(0, 0, 0, 0.8)',
-    'OH_IES': 'rgba(0, 0, 0, 0.6)', 'OH_DSB': 'rgba(0, 0, 0, 0.45)',
+    'OH_OSJE': 'rgba(0, 0, 0, 0.8)',
+    'OH_IES': 'rgba(0, 0, 0, 0.6)',
+    'OH_DSB': 'rgba(0, 0, 0, 0.45)',
+    'OH_DSBJE': 'rgba(0, 0, 0, 0.45)',
 }
 #####
 
@@ -66,6 +74,14 @@ input_menus = html.Div(
                                       cols=[wwBcol, wwKLcol], width='one', df=df_sji),
         dash_create_menu_glazing(menu_id='G_input(p1)', col=Gcol,
                                  width='one', df=df_sji),
+        dash_create_menu_textinput(
+            menu_id=[
+                'trace_group_1_input(p1)',
+                'trace_group_2_input(p1)',
+                'trace_group_3_input(p1)',
+            ],
+            width='one'),
+
         # dash_create_menu_rooms(menu_id='R_input(p1)', width='one', ROOMS=ROOMS),
         # dash_create_menu_daterange(width='one'),
     ],
@@ -166,10 +182,19 @@ def set_vnt_B_value(available_options):
         Input('F_input(p1)', 'value'),
         Input('VNT_B_input(p1)', 'value'), Input('VNT_KL_input(p1)', 'value'),
         Input('WW_B_input(p1)', 'value'), Input('WW_KL_input(p1)', 'value'),
-        Input('G_input(p1)', 'value')
+        Input('G_input(p1)', 'value'),
+        Input('trace_group_1_input(p1)', 'value'),
+        Input('trace_group_2_input(p1)', 'value'),
+        Input('trace_group_3_input(p1)', 'value'),
+
     ])
-def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
-                               VNT_B_value, VNT_KL_value, WW_B_value, WW_KL_value, G_value):
+def update_chart_bar_runperiod(
+    D_value, W1_value, W2_value, F_value,
+    VNT_B_value, VNT_KL_value, WW_B_value, WW_KL_value,
+    G_value,
+    trace_group_1, trace_group_2, trace_group_3,
+    ):
+
     import time
     start_time = time.time()
     all_traces = []
@@ -216,82 +241,129 @@ def update_chart_bar_runperiod(D_value, W1_value, W2_value, F_value,
             # print(int(N))
             dash_fig_multi_RP_add_bars(
                 fig_multi=fig_multi_rp,
-                df=df_ep_rp, platform='EP',
+                df=df_ep_rp, platform='OSJE',
                 N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
                 room=room, row=row,
                 bar_width=bar_width, outline_width=1.3,
                 colors_dict=colors_dict, all_traces=all_traces,
             )
 
-    try:
-        table = 'IES_{}_RP'.format(D)
-        df_ies_rp = pd.read_sql_query(
-            con=app.db_conn,
-            sql="""SELECT * FROM {table}
+#
+
+    # RUNPERIOD SIMRES
+    i = 0
+    for trace_group in [trace_group_1, trace_group_2, trace_group_3]:
+        i=i+1
+
+        try:
+            table = '{}_{}_24_RP'.format(trace_group, D) if 'JE' in trace_group \
+                else '{}_{}_RP'.format(trace_group, D)
+            
+            df_rp = pd.read_sql_query(
+                con = app.db_conn,
+                sql = """SELECT * FROM {table}
                 WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
                 """.format(
-                table=table,
-                Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
-            )
-        )
-        print('df_ies_rp: {}'.format(df_ies_rp.shape))
-        #
-        for i in range(0, len(ROOMS), 1):
-            row = i + 1
-            col = i + 1
-            room = ROOMS[i]
-            print('\n\ni:{} | room:{} | row:{}'.format(i, room, row))
-
-            for N in NORTH:
-                # print(int(N))
-                dash_fig_multi_RP_add_bars(
-                    fig_multi=fig_multi_rp,
-                    df=df_ies_rp, platform='IES',
-                    N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
-                    room=room, row=row,
-                    bar_width=bar_width, outline_width=1.3,
-                    colors_dict=colors_dict, all_traces=all_traces,
+                    table=table,
+                    Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value,
+                    )
                 )
+            print(table)
+            print(df_rp.shape)
+            #
+            for i in range(0, len(ROOMS), 1):
+                row = i + 1
+                col = i + 1
+                room = ROOMS[i]
+                print('\n\ni:{} | room:{} | row:{}'.format(i, room, row))
+
+                for N in NORTH:
+                    # print(int(N))
+                    dash_fig_multi_RP_add_bars(
+                        fig_multi=fig_multi_rp,
+                        df=df_rp, platform=trace_group,
+                        N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
+                        room=room, row=row,
+                        bar_width=bar_width, outline_width=1.3,
+                        colors_dict=colors_dict, all_traces=all_traces,
+                    )
+        except:
             print('Could not retrieve table: {}'.format(table))
-    except:
-        'Do nothing'
-
-    #####
-
-    try:
-        table = 'DSB_{}_RP'.format(D)
-        df_dsb_rp = pd.read_sql_query(
-            con=app.db_conn,
-            sql="""SELECT * FROM {table}
-                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
-                """.format(
-                table=table,
-                Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
-            )
-        )
-        print('df_dsb_rp: {}'.format(df_dsb_rp.shape))
         #
-        for i in range(0, len(ROOMS), 1):
-            row = i + 1
-            col = i + 1
-            room = ROOMS[i]
-            print('\ni:{} | room:{} | row:{}'.format(i, room, row))
+        print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
 
-            for N in NORTH:
-                # print(int(N))
-                dash_fig_multi_RP_add_bars(
-                    df=df_dsb_rp, platform='DSB',
-                    fig_multi=fig_multi_rp,
-                    N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
-                    room=room, row=row,
-                    bar_width=bar_width, outline_width=1.3,
-                    colors_dict=colors_dict, all_traces=all_traces,
-                )
-            print('DSB traces added')
-    except:
-        print('Could not retrieve table: {}'.format(table))
 
-        print('\t\t%s seconds' % (time.time() - start_time))
+
+
+    # try:
+    #     table = 'IES_{}_RP'.format(D)
+    #     df_ies_rp = pd.read_sql_query(
+    #         con=app.db_conn,
+    #         sql="""SELECT * FROM {table}
+    #             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+    #             """.format(
+    #             table=table,
+    #             Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+    #         )
+    #     )
+    #     print('df_ies_rp: {}'.format(df_ies_rp.shape))
+    #     #
+    #     for i in range(0, len(ROOMS), 1):
+    #         row = i + 1
+    #         col = i + 1
+    #         room = ROOMS[i]
+    #         print('\n\ni:{} | room:{} | row:{}'.format(i, room, row))
+
+    #         for N in NORTH:
+    #             # print(int(N))
+    #             dash_fig_multi_RP_add_bars(
+    #                 fig_multi=fig_multi_rp,
+    #                 df=df_ies_rp, platform='IES',
+    #                 N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
+    #                 room=room, row=row,
+    #                 bar_width=bar_width, outline_width=1.3,
+    #                 colors_dict=colors_dict, all_traces=all_traces,
+    #             )
+    #         print('Could not retrieve table: {}'.format(table))
+    # except:
+    #     'Do nothing'
+
+    # #####
+
+    # try:
+    #     table = 'DSB_{}_RP'.format(D)
+    #     df_dsb_rp = pd.read_sql_query(
+    #         con=app.db_conn,
+    #         sql="""SELECT * FROM {table}
+    #             WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+    #             """.format(
+    #             table=table,
+    #             Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+    #         )
+    #     )
+    #     print('df_dsb_rp: {}'.format(df_dsb_rp.shape))
+    #     #
+    #     for i in range(0, len(ROOMS), 1):
+    #         row = i + 1
+    #         col = i + 1
+    #         room = ROOMS[i]
+    #         print('\ni:{} | room:{} | row:{}'.format(i, room, row))
+
+    #         for N in NORTH:
+    #             # print(int(N))
+    #             dash_fig_multi_RP_add_bars(
+    #                 df=df_dsb_rp, platform='DSB',
+    #                 fig_multi=fig_multi_rp,
+    #                 N=int(N), N_angle_dict=N_angle_dict, Ncol=Ncol,
+    #                 room=room, row=row,
+    #                 bar_width=bar_width, outline_width=1.3,
+    #                 colors_dict=colors_dict, all_traces=all_traces,
+    #             )
+    #         print('DSB traces added')
+    # except:
+    #     print('Could not retrieve table: {}'.format(table))
+
+    #     print('\t\t%s seconds' % (time.time() - start_time))
 
     #####
 

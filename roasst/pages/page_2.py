@@ -187,7 +187,7 @@ def update_chart_scatter_hr(
     VNT_B_value, VNT_KL_value, WW_B_value, WW_KL_value,
     G_value, room,
     start_date, end_date,
-    trace_group_1, trace_group_2, trace_group_3, 
+    trace_group_1, trace_group_2, trace_group_3,
     ):
     traces_hr = []
     import time
@@ -236,10 +236,9 @@ def update_chart_scatter_hr(
         linewidth=1.5,
         )    
 
+#
 
-#####
-
-    # DBS - HOURLY SIMRES
+    # HOURLY SIMRES
     i = 0
     dict_line = {1:'dot', 2:'dash', 3:'dashdot'}
     for trace_group in [trace_group_1, trace_group_2, trace_group_3]:
