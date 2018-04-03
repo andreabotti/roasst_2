@@ -6,7 +6,7 @@ import dash_table_experiments as dt
 from roasst import urls
 from roasst.app import app
 
-from roasst.pages import *
+from roasst.pages import page_1_layout, page_2_layout
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -20,6 +20,8 @@ index_page = html.Div([
     dcc.Link('Dash app 1', href=urls.page_1),
     html.Br(),
     dcc.Link('Dash app 2', href=urls.page_2),
+    # html.Br(),
+    # dcc.Link('Dash app 3', href=urls.page_3),
 ])
 
 
@@ -30,6 +32,8 @@ def display_page(pathname):
     if pathname == urls.page_1:
         return page_1_layout
     elif pathname == urls.page_2:
-        return page_2_layout          #page_2_layout
+        return page_2_layout
+    # elif pathname == urls.page_3:
+    #     return page_3_layout
     else:
         return index_page
