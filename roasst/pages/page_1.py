@@ -46,7 +46,7 @@ colors_dict = {
 
 
 # I need to query one database with simulation results to populate the menus
-D = 'P2302'
+D = DWELLINGS[0]
 SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
 table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
