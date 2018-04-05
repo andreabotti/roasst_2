@@ -176,7 +176,7 @@ def set_vnt_B_value(available_options):
 
 
 @app.callback(
-    Output('scatter_hr', 'figure'),
+    Output('scatter_hr_100', 'figure'),
     [
         Input('input_SW_D_SJ_1_p100', 'value'),
         Input('input_SW_D_SJ_2_p100', 'value'),
@@ -189,9 +189,7 @@ def set_vnt_B_value(available_options):
         Input('date_picker_range', 'start_date'), Input('date_picker_range', 'end_date'),
     ]
     )
-
-
-def update_chart_scatter_hr(
+def update_chart_scatter_hr_100(
     SW_D_SJ_1,
     SW_D_SJ_2,
     SW_D_SJ_3,
