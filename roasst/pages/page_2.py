@@ -45,7 +45,7 @@ input_menus = html.Div(
         'font-size':13,
         },
     children=[
-        dash_create_menu_unit(
+        dash_create_menu_dwelling(
             menu_id='D_input(p2)',
             width='one', menu_type='radio', DWELLINGS=DWELLINGS,
             ),

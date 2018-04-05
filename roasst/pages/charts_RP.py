@@ -161,298 +161,6 @@ def dash_fig_multi_RP_add_bars(fig_multi,
 
 
 
-
-#####
-
-def fig_multi_RP_add_bars(fig_multi, df_ies, df_ep, N, N_angle_dict, row,
-    room, bar_width, outline_width, colors_dict, all_traces):
-
-    df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
-    df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
-    # print(df_ies)
-
-
-    platform = 'IES'
-    bar_fill = 'rgba(0,0,0,0)' 
-    #
-    y1a = df_ies[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(platform),
-    trace = go.Bar(
-        x = y1a,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x1',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['HL_'+platform], width=outline_width),
-            color=bar_fill,
-            ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=1)
-    all_traces.append(trace)
-    
-    #
-    y2a = df_ies[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(platform),
-    trace = go.Bar(
-        x = y2a,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x2',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
-            color=bar_fill,
-            ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=2)
-    all_traces.append(trace)
-
-    
-    #
-    y3a = df_ies[room+'_VNT(l/s)']
-    name='VNT(l/s)({})'.format(platform),
-    trace = go.Bar(
-        x = y3a,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x3',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['HL_'+platform], width=outline_width),
-            color=bar_fill,
-            ),
-        name=name,
-        text='{}'.format(y3a[0].round(1)), textposition='inside',
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=3)
-    all_traces.append(trace)
-    
-    #
-    y4a = df_ies[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(platform),
-    trace = go.Bar(
-        x = y4a,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x4',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
-            color=bar_fill,
-            ),
-        name=name,
-        text='{}'.format(y4a[0].round(1)), textposition='inside',
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=4)
-    all_traces.append(trace)
-
-    #
-    y5a = df_ies[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(platform),
-    trace = go.Bar(
-        x = y5a,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x5',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['OH_'+platform], width=outline_width),
-            color=bar_fill,
-            ),
-        name=name,
-        text='{}'.format(y5a[0].round(1)), textposition='inside',
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=5)
-    all_traces.append(trace)
-
-
-
-#####
-
-    platform = 'EP'
-    #
-    y1b = - df_ep[room+'_HL_VNT(kWh)']
-    name='HL_VNT({})'.format(platform),
-    trace = go.Bar(
-        x = y1b,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x1',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['HL_'+platform]),
-        name=name, legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=1)
-    all_traces.append(trace)
-
-    #
-    y2b = df_ep[room+'_HG_SOLAR(kWh)']
-    name='HL_SOLAR({})'.format(platform),
-    trace = go.Bar(
-        x = y2b,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x2',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['HG_'+platform]),        
-        name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=2)
-    all_traces.append(trace)
-
-    #
-    y3b = df_ep[room+'_VNT(l/s)']
-    name='VNT(l/s)({})'.format(platform)
-    if y3b[0]>y3a[0]:
-        text_pos = 'outside'
-    else:
-        text_pos = 'inside'
-
-    trace = go.Bar(
-        x = y3b,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x3',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+platform]),
-        name=name,
-        text='{}'.format(y3b[0].round(1)),
-        textposition=text_pos,
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=3)
-    all_traces.append(trace)
-
-    #
-    y4b = df_ep[room+'_VNT(ach)']
-    name='VNT(ach)({})'.format(platform)
-    if y4b[0]>y4a[0]:
-        text_pos = 'outside'
-    else:
-        text_pos = 'inside'
-
-    trace = go.Bar(
-        x = y4b,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x4',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+platform]),
-        name=name,
-        text='{}'.format(y4b[0].round(1)),
-        textposition=text_pos,
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=4)
-    all_traces.append(trace)
-
-    #
-    y5b = df_ep[room+'_TM59_Ca'] * 100
-    name='TM59_Ca({})'.format(platform),
-    text_pos = 'inside'    
-    trace = go.Bar(
-        x = y5b,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x5',
-        yaxis='y{}'.format(row),
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['OH_'+platform]),
-        name=name,
-        text='{}'.format(y5b[0].round(1)),
-        textposition=text_pos,
-        textfont=dict(color='rgba(0,0,0,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=5)
-    all_traces.append(trace)
-
-
-
-
-#####
-
-
-def create_update_menu_RP(df_ep, values_list, groups, lenght_true_false, U, F):
-
-    df_ep = df_ep.loc[ df_ep['@vnt_B(l/s)'] == values_list[0] ]
-    values_KL = df_ep['@vnt_KL(l/s)'].unique()
-
-
-
-    true_set = list(np.ones(lenght_true_false, dtype=bool))
-    false_set = list(np.zeros(lenght_true_false, dtype=bool))
-
-    updatemenus = list([dict(active=0,
-        buttons=list([
-            dict(label = '{}l/s'.format(values_list[0]),
-                method = 'update',
-                args = [
-                {'visible': groups * (true_set+false_set+false_set)},
-                {'title': 'EPLUS-IES COMPARISON<br><i>unit</i>: <b>{}</b> | <i>floor</i>: <b>{}</b>'.format(U, F)+
-                ' | <i>max.vnt.rate</i>: <b>{}</b>l/s'.format(values_list[0])},
-                ]
-                ),
-            dict(label = '{}l/s'.format(values_list[1]),
-                method = 'update',
-                args = [
-                {'visible': groups * (false_set+true_set+false_set)},
-                {'title': 'EPLUS-IES COMPARISON<br><i>unit</i>: <b>{}</b> | <i>floor</i>: <b>{}</b>'.format(U, F)+
-                ' | <i>max.vnt.rate</i>: <b>{}</b>l/s'.format(values_list[1])},
-                ],
-                ),
-            dict(label = '{}l/s'.format(values_list[2]),
-                method = 'update',
-                args = [
-                {'visible': groups * (false_set+false_set+true_set)},
-                {'title': 'EPLUS-IES COMPARISON<br><i>unit</i>: <b>{}</b> | <i>floor</i>: <b>{}</b>'.format(U, F)+
-                ' | <i>max.vnt.rate</i>: <b>{}</b>l/s'.format(values_list[2])},
-                ],
-                ),
-            ]),
-        direction = 'down',
-        pad = {'r': 10, 't': 10},
-        showactive = True,
-        x = 0.68,
-        xanchor = 'left',
-        y = 1.08,
-        yanchor = 'top' 
-    )])
-
-    return updatemenus
-
-
-######
-
-
-
-
-
-
-
-
-
-
-
-
 #####
 
 def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_angle_dict, row,
@@ -639,198 +347,198 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
 
 
 
-def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, N_angle_dict, row,
-    room, bar_width, outline_width, colors_dict, all_traces):
+# def fig_multi_RP_add_traces_EP_IES_SAP_ALL(fig_multi, df_ies, df_ep, df_sap, N, N_angle_dict, row,
+#     room, bar_width, outline_width, colors_dict, all_traces):
 
 
-    df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
-    df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
-    row = 3
+#     df_ies = df_ies.loc[ df_ies[Ncol] == int(N) ]
+#     df_ep = df_ep.loc[ df_ep[Ncol] == int(N) ]
+#     row = 3
 
-    ######
+#     ######
     
-    platform = 'IES'
-    bar_fill = 'rgba(0,0,0,0)' 
-    #
-    y1a_sum = df_ies['BD1_HG_SOLAR(W)'] + df_ies['KL_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(platform),
-    trace = go.Bar(
-        x = y1a_sum,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(1*row),
-        yaxis='y3',
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['HG_'+platform], width=outline_width),
-            color=bar_fill,
-            ),        
-        name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=1)
-    all_traces.append(trace)
+#     platform = 'IES'
+#     bar_fill = 'rgba(0,0,0,0)' 
+#     #
+#     y1a_sum = df_ies['BD1_HG_SOLAR(W)'] + df_ies['KL_HG_SOLAR(W)']
+#     name='HL_SOLAR({})'.format(platform),
+#     trace = go.Bar(
+#         x = y1a_sum,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(1*row),
+#         yaxis='y3',
+#         orientation='h',
+#         width=bar_width,
+#         marker=dict(
+#             line=dict(color=colors_dict['HG_'+platform], width=outline_width),
+#             color=bar_fill,
+#             ),        
+#         name=name, text='{}'.format(room), legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=1)
+#     all_traces.append(trace)
 
         
-    #
-    y2a_avg = (df_ies['BD1_VNT(ach)']*35.25 + df_ies['BD1_VNT(ach)']*64.76)/149.69
+#     #
+#     y2a_avg = (df_ies['BD1_VNT(ach)']*35.25 + df_ies['BD1_VNT(ach)']*64.76)/149.69
 
-    name='VNT(ach)({})'.format(platform),
-    trace = go.Bar(
-        x = y2a_avg,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(2*row),
-        yaxis='y3',
-        orientation='h',
-        width=bar_width,
-        marker=dict(
-            line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
-            color=bar_fill,
-            ),
-        name=name,
-        text='{}'.format(y2a_avg[0].round(1)), textposition='inside',
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=2)
-    all_traces.append(trace)
-
-
-
-    platform = 'EP'
-    #
-    y1b_sum = df_ep['BD1_HG_SOLAR(W)'] + df_ep['KL_HG_SOLAR(W)']
-    name='HL_SOLAR({})'.format(platform),
-    trace = go.Bar(
-        x = y1b_sum,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(1*row),
-        yaxis='y3',
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['HG_'+platform]),        
-        name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=1)
-    all_traces.append(trace)
+#     name='VNT(ach)({})'.format(platform),
+#     trace = go.Bar(
+#         x = y2a_avg,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(2*row),
+#         yaxis='y3',
+#         orientation='h',
+#         width=bar_width,
+#         marker=dict(
+#             line=dict(color=colors_dict['VNT_'+platform], width=outline_width),
+#             color=bar_fill,
+#             ),
+#         name=name,
+#         text='{}'.format(y2a_avg[0].round(1)), textposition='inside',
+#         textfont=dict(color='rgba(255,255,255,0.8)'),
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=2)
+#     all_traces.append(trace)
 
 
-    #
-    y2b_avg = (df_ep['BD1_VNT(ach)']*35.25 + df_ep['BD1_VNT(ach)']*64.76)/149.69
-    name='VNT(ach)({})'.format(platform)
 
-    trace = go.Bar(
-        x = y2b_avg,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(2*row),
-        yaxis='y3',
-        orientation='h',
-        width=bar_width,
-        marker=dict(color=colors_dict['VNT_'+platform]),
-        name=name,
-        # text='{}'.format(y2b_avg[0].round(1)),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=2)
-    all_traces.append(trace)
+#     platform = 'EP'
+#     #
+#     y1b_sum = df_ep['BD1_HG_SOLAR(W)'] + df_ep['KL_HG_SOLAR(W)']
+#     name='HL_SOLAR({})'.format(platform),
+#     trace = go.Bar(
+#         x = y1b_sum,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(1*row),
+#         yaxis='y3',
+#         orientation='h',
+#         width=bar_width,
+#         marker=dict(color=colors_dict['HG_'+platform]),        
+#         name=name, text='{}'.format(platform), legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=1)
+#     all_traces.append(trace)
 
 
-#####
+#     #
+#     y2b_avg = (df_ep['BD1_VNT(ach)']*35.25 + df_ep['BD1_VNT(ach)']*64.76)/149.69
+#     name='VNT(ach)({})'.format(platform)
 
-    df_sap = df_sap.loc[ df_sap[Ncol] == int(N) ]
+#     trace = go.Bar(
+#         x = y2b_avg,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(2*row),
+#         yaxis='y3',
+#         orientation='h',
+#         width=bar_width,
+#         marker=dict(color=colors_dict['VNT_'+platform]),
+#         name=name,
+#         # text='{}'.format(y2b_avg[0].round(1)),
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=2)
+#     all_traces.append(trace)
+
+
+# #####
+
+#     df_sap = df_sap.loc[ df_sap[Ncol] == int(N) ]
 
     
-    y1sap = df_sap['Gss_jun']
-    name='Gss_jun',
-    trace = go.Scatter(
-        x = y1sap,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(1*row),
-        yaxis='y{}'.format(row),
-        marker=dict(
-            size=10,
-            color='rgba(0,0,0,0.8',
-            symbol='circle-open',
-        ),      
-        name=name,
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=1)
-    all_traces.append(trace)
+#     y1sap = df_sap['Gss_jun']
+#     name='Gss_jun',
+#     trace = go.Scatter(
+#         x = y1sap,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(1*row),
+#         yaxis='y{}'.format(row),
+#         marker=dict(
+#             size=10,
+#             color='rgba(0,0,0,0.8',
+#             symbol='circle-open',
+#         ),      
+#         name=name,
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=1)
+#     all_traces.append(trace)
 
 
-    #
-    y2sap = df_sap['SAP_P1(ach)']
-    name='SAP_P1(ach)',
-    trace = go.Scatter(
-        x = y2sap,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(2*row),
-        yaxis='y{}'.format(row),
-        marker=dict(
-            size=10,
-            color='rgba(0,0,0,0.8',
-            symbol='circle-open',
-        ),      
-        name=name,
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=2)
-    all_traces.append(trace)
+#     #
+#     y2sap = df_sap['SAP_P1(ach)']
+#     name='SAP_P1(ach)',
+#     trace = go.Scatter(
+#         x = y2sap,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(2*row),
+#         yaxis='y{}'.format(row),
+#         marker=dict(
+#             size=10,
+#             color='rgba(0,0,0,0.8',
+#             symbol='circle-open',
+#         ),      
+#         name=name,
+#         textfont=dict(color='rgba(255,255,255,0.8)'),
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=2)
+#     all_traces.append(trace)
 
 
-    #
-    y5sap = df_sap['Tt_jun']
-    name='Tt_jun',
-    trace = go.Scatter(
-        x = y5sap,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(4*row),
-        yaxis='y{}'.format(row),
-        marker=dict(
-            size=10,
-            color='rgba(0,0,0,0.8',
-            symbol='star-open',
-            ),
-        name=name,
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=4)
-    all_traces.append(trace)
+#     #
+#     y5sap = df_sap['Tt_jun']
+#     name='Tt_jun',
+#     trace = go.Scatter(
+#         x = y5sap,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(4*row),
+#         yaxis='y{}'.format(row),
+#         marker=dict(
+#             size=10,
+#             color='rgba(0,0,0,0.8',
+#             symbol='star-open',
+#             ),
+#         name=name,
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=4)
+#     all_traces.append(trace)
 
-    y5sap = df_sap['Tt_jul']
-    name='Tt_jul',
-    trace = go.Scatter(
-        x = y5sap,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(4*row),
-        yaxis='y{}'.format(row),
-        marker=dict(
-            size=10,
-            color='rgba(0,0,0,0.8',
-            symbol='square-open',
-            ),
-        name=name,
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=4)
-    all_traces.append(trace)
+#     y5sap = df_sap['Tt_jul']
+#     name='Tt_jul',
+#     trace = go.Scatter(
+#         x = y5sap,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(4*row),
+#         yaxis='y{}'.format(row),
+#         marker=dict(
+#             size=10,
+#             color='rgba(0,0,0,0.8',
+#             symbol='square-open',
+#             ),
+#         name=name,
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=4)
+#     all_traces.append(trace)
 
-    y5sap = df_sap['Tt_aug']
-    name='Tt_aug',
-    trace = go.Scatter(
-        x = y5sap,
-        y = '{} ({})'.format(N,N_angle_dict[N]),
-        xaxis='x{}'.format(4*row),
-        yaxis='y{}'.format(row),
-        marker=dict(
-            size=10,
-            color='rgba(0,0,0,0.8',
-            symbol='triangle-up-open',
-            ),
-        name=name,      
-        textfont=dict(color='rgba(255,255,255,0.8)'),
-        legendgroup='{}'.format(platform),
-        )
-    fig_multi.append_trace(trace, row=row, col=4)
-    all_traces.append(trace)
+#     y5sap = df_sap['Tt_aug']
+#     name='Tt_aug',
+#     trace = go.Scatter(
+#         x = y5sap,
+#         y = '{} ({})'.format(N,N_angle_dict[N]),
+#         xaxis='x{}'.format(4*row),
+#         yaxis='y{}'.format(row),
+#         marker=dict(
+#             size=10,
+#             color='rgba(0,0,0,0.8',
+#             symbol='triangle-up-open',
+#             ),
+#         name=name,      
+#         textfont=dict(color='rgba(255,255,255,0.8)'),
+#         legendgroup='{}'.format(platform),
+#         )
+#     fig_multi.append_trace(trace, row=row, col=4)
+#     all_traces.append(trace)

@@ -6,7 +6,64 @@ import dash_html_components as html
 import dash_table_experiments as dt
 
 
-def dash_create_menu_unit(DWELLINGS, menu_type, menu_id, width):
+#
+
+def dash_create_menu_textinput(menu_id, width):
+    return html.Div(
+        className='{} columns'.format(width),
+        style={'fontSize': 12},
+        children=[
+            html.H6('TRACES'),
+            dcc.Input(id=menu_id[0], value='', type='text'),
+            dcc.Input(id=menu_id[1], value='', type='text'),
+            dcc.Input(id=menu_id[2], value='', type='text'),
+        ]
+    )
+
+def dash_create_menu_dwelling_textinput(menu_id, width):
+    return html.Div(
+        className='{} columns'.format(width),
+        style={'fontSize': 12},
+        children=[
+            html.H6('TRACES'),
+            dcc.Input(id=menu_id[0], value='OSJE_P1201_24', type='text'),
+            dcc.Input(id=menu_id[1], value='DSBJE_P1201_24', type='text'),
+            dcc.Input(id=menu_id[2], value='DSB_P1201', type='text'),
+        ]
+    )
+
+#
+
+def dash_create_menu_table(tables, menu_id, width):
+    # Defines input menus for exploring results
+    T_list = [x for x in sorted(tables)]
+    T_options = [{'label': x, 'value': x} for x in sorted(tables)]
+
+    html_drowpdown = html.Div([
+        html.H6('TABLE'),
+        dcc.Dropdown(
+            id=menu_id[0], options=T_options, value='OSJE_P1201_24_HR',
+            multi=False,
+        ),
+        dcc.Dropdown(
+            id=menu_id[2], options=T_options, value=T_list[2],
+            multi=False,
+        ),
+        dcc.Dropdown(
+            id=menu_id[2], options=T_options, value=T_list[2],
+            multi=False,
+        ),
+    ],
+        className='{} columns'.format(width),
+        style={'margin-right': '10'},
+    )
+
+    return html_drowpdown
+
+
+#
+
+def dash_create_menu_dwelling(DWELLINGS, menu_type, menu_id, width):
     # Defines input menus for exploring results
     D_list = [x for x in sorted(DWELLINGS)]
     D_options = [{'label': x, 'value': x} for x in sorted(DWELLINGS)]
@@ -287,23 +344,10 @@ def dash_create_menu_datepickerrange(width):
     )
 
 
-def dash_create_menu_textinput(menu_id, width):
-    return html.Div(
-        className='{} columns'.format(width),
-        style={'fontSize': 12},
-        children=[
-            html.H6('TRACES'),
-            dcc.Input(id=menu_id[0], value='', type='text'),
-            dcc.Input(id=menu_id[1], value='', type='text'),
-            dcc.Input(id=menu_id[2], value='', type='text'),
-        ]
-    )
-
-
 #
 
 
-def dash_create_menu_OH_metric():
+def dash_create_menu_OH_criterion(menu_id, width):
     metrics = ['HA26p', 'TM59_Ca']
     crit_list = [x for x in metrics]
     crit_options = [{'label': x, 'value': x} for x in metrics]
@@ -314,7 +358,7 @@ def dash_create_menu_OH_metric():
         children=[
             html.H6('OH Criterion'),
             dcc.RadioItems(
-                id='crit_input', options=crit_options, value=crit_list[0],
+                id=menu_id, options=crit_options, value=crit_list[1],
                 # labelStyle={'display': 'inline-block'}
             ),
         ],

@@ -300,3 +300,68 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
     )
 
     return layout_hr
+
+
+
+#
+
+
+def create_layout_HR_comparison():
+    
+    layout_hr = go.Layout(
+        margin=go.Margin(l=60, r=40, b=40, t=40),
+        yaxis1=dict(
+            domain=[0, 0.12], range=[0,8], dtick=2, showgrid=False,
+            #
+            title='<b>NAT. VENT.<br>(ACH)</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=15,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+            ),
+        #
+        yaxis2=dict(
+            domain=[0.18, 0.55], range=[-600,800], dtick=200, showgrid=True,
+            ticksuffix='W',
+            #
+            title='<b>HEAT GAINS / LOSSES</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=15,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+            ),
+        #
+        yaxis3=dict(
+            domain=[0.62,1], range=[20,34], dtick=2, showgrid=True,
+            ticksuffix='°C',
+            #
+            title='<b>TEMPERATURE</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=15,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+        ),
+    )
+
+    return layout_hr
