@@ -26,7 +26,7 @@ def dash_create_menu_dwelling_textinput(menu_id, width):
         style={'fontSize': 12},
         children=[
             html.H6('TRACES'),
-            dcc.Input(id=menu_id[0], value='OSJE_P1201_24', type='text'),
+            dcc.Input(id=menu_id[0], value='P1201_OSJE24_HR', type='text'),
             dcc.Input(id=menu_id[1], value='DSBJE_P1201_24', type='text'),
             dcc.Input(id=menu_id[2], value='DSB_P1201', type='text'),
         ]
@@ -46,11 +46,11 @@ def dash_create_menu_table(tables, menu_id, width):
             multi=False,
         ),
         dcc.Dropdown(
-            id=menu_id[2], options=T_options, value=T_list[2],
+            id=menu_id[2], options=T_options, value=T_list[-1],
             multi=False,
         ),
         dcc.Dropdown(
-            id=menu_id[2], options=T_options, value=T_list[2],
+            id=menu_id[2], options=T_options, value=T_list[-1],
             multi=False,
         ),
     ],
@@ -325,14 +325,14 @@ def dash_create_menu_month(width):
     )
 
 
-def dash_create_menu_datepickerrange(width):
+def dash_create_menu_datepickerrange(menu_id, width):
     return html.Div(
         className='{} columns'.format(width),
         style={'fontSize': 12},
         children=[
             html.H6('DATE'),
             dcc.DatePickerRange(
-                id='date_picker_range',
+                id=menu_id,
                 start_date=dt(1989, 5, 1),
                 end_date_placeholder_text='Select a date',
                 display_format='MMM, DD',

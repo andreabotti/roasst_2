@@ -67,10 +67,8 @@ def assign_trace_fill_outline(D, R):
 D = 'P1201'
 SIM_JOBS = 24
 platform = 'DSBJE'
-# SIM_TOOL, SIM_JOBS, RVX = 'JESS', 864, 'EMS_RP'
 #
-table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
-# table = 'ALL_{}_SJI'.format(SIM_JOBS)
+table = 'TEMPLATE_SJI'
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 
 

@@ -133,7 +133,7 @@ input_menus = html.Div(
 chart_HR_scatter = html.Div(
     children=[
         dcc.Graph(
-            id='scatter_hr',
+            id='100_hr_LineChart',
             figure={},
             style={'height': '680px'},
             ),
@@ -154,13 +154,13 @@ dashapp.layout = html.Div(
         page_title,
         input_menus,
         html.Hr(),
-        # chart_HR_scatter,
+        chart_HR_scatter,
         ],
     )
 
 
 @dashapp.callback(
-    Output('scatter_hr', 'figure'),
+    Output('100_hr_LineChart', 'figure'),
         [
         Input('input_T1_p100', 'value'),
         Input('input_T2_p100', 'value'),
