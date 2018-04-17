@@ -35,7 +35,8 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
     y3a = df[room+'_HG_PPL(W)']
     y4a = df[room+'_HL_VNT(W)']
     y5a = df[room+'_VNT(ach)']
-#####
+
+#
 
     trace1a = go.Scatter(
         x = x,
@@ -49,7 +50,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
     trace2a = go.Scatter(
         x = x,
         y = y2a,
@@ -62,20 +63,20 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
-    trace3a = go.Scatter(
-        x = x,
-        y = y3a,
-        yaxis='y2',
-        name='PEOPLE ({})'.format(group),
-        line = dict(
-            color = 'rgb(57, 88, 39)',
-            width = linewidth,
-            dash = dash_style,
-            ),
-        legendgroup=group,
-        )
-#####
+#
+    # trace3a = go.Scatter(
+    #     x = x,
+    #     y = y3a,
+    #     yaxis='y2',
+    #     name='PEOPLE ({})'.format(group),
+    #     line = dict(
+    #         color = 'rgb(57, 88, 39)',
+    #         width = linewidth,
+    #         dash = dash_style,
+    #         ),
+    #     legendgroup=group,
+    #     )
+#
     trace4a = go.Scatter(
         x = x,
         y = y4a,
@@ -88,7 +89,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
     trace5a = go.Scatter(
         x = x,
         y = y5a,
@@ -102,8 +103,15 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
         legendgroup=group,
         )
 
-    traces_hr = [trace5a, trace2a, trace3a, trace4a, trace1a]
+    traces_hr = [
+    trace5a,
+    trace2a,
+    # trace3a,
+    trace4a,
+    trace1a,
+    ]
     return traces_hr
+
 
 #####
 

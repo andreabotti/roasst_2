@@ -34,7 +34,7 @@ def dash_create_menu_dwelling_textinput(menu_id, width):
 
 #
 
-def dash_create_menu_table(tables, menu_id, width):
+def dash_create_menu_table_3fields(tables, multi, menu_id, width):
     # Defines input menus for exploring results
     T_list = [x for x in sorted(tables)]
     T_options = [{'label': x, 'value': x} for x in sorted(tables)]
@@ -42,16 +42,36 @@ def dash_create_menu_table(tables, menu_id, width):
     html_drowpdown = html.Div([
         html.H6('TABLE'),
         dcc.Dropdown(
-            id=menu_id[0], options=T_options, value='OSJE_P1201_24_HR',
-            multi=False,
+            id=menu_id[0], options=T_options, value='P1201_OSJE216_HR',
+            multi=multi,
+        ),
+        dcc.Dropdown(
+            id=menu_id[1], options=T_options, value=T_list[-1],
+            multi=multi,
         ),
         dcc.Dropdown(
             id=menu_id[2], options=T_options, value=T_list[-1],
-            multi=False,
+            multi=multi,
         ),
+    ],
+        className='{} columns'.format(width),
+        style={'margin-right': '10'},
+    )
+
+    return html_drowpdown
+
+#
+
+def dash_create_menu_table_1field(tables, multi, menu_id, width):
+    # Defines input menus for exploring results
+    T_list = [x for x in sorted(tables)]
+    T_options = [{'label': x, 'value': x} for x in sorted(tables)]
+
+    html_drowpdown = html.Div([
+        html.H6('TABLE'),
         dcc.Dropdown(
-            id=menu_id[2], options=T_options, value=T_list[-1],
-            multi=False,
+            id=menu_id, options=T_options, value='P1201_OSJE216_RP',
+            multi=multi,
         ),
     ],
         className='{} columns'.format(width),

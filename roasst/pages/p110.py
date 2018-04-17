@@ -43,7 +43,7 @@ TABLES = []
 q = app.db_conn.execute('SHOW TABLES')
 for (table_name,) in q.fetchall():
         TABLES.append(table_name)
-print(TABLES)
+TABLES_HR = [T for T in TABLES if '_HR' in T]
 
 #
 
@@ -55,23 +55,19 @@ input_menus = html.Div(
         'font-size':13,
         },
     children=[
-        dash_create_menu_table(
-            tables=TABLES,
-            menu_id=['input_T1_p110','input_T2_p110','input_T3_p110'],
+        dash_create_menu_table_1field(
+            tables=TABLES_HR,
+            multi=True,
+            menu_id='input_T1_p110',
             width='two',
             ),
-        # dash_create_menu_textinput(
-        #     menu_id=[
-        #         'input_SW_D_SJ_1_p110',
-        #         'input_SW_D_SJ_2_p110',
-        #         'input_SW_D_SJ_3_p110',
-        #     ],
-        #     width='two'),
-
-        # dash_create_menu_dwelling(
-        #     menu_id='input_D_p110',
-        #     width='one', menu_type='radio', DWELLINGS=DWELLINGS,
+        # dash_create_menu_table_3fields(
+        #     tables=TABLES_HR,
+        #     multi=False,
+        #     menu_id=['input_T1_p110','input_T2_p110','input_T3_p110'],
+        #     width='two',
         #     ),
+
         dash_create_menu_weather(
             menu_id=['input_W1_p110','input_W2_p110'],
             widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
@@ -120,7 +116,7 @@ p110_layout = html.Div(
     children = [
         page_title,
         input_menus,
-        html.Hr(),
+        # html.Hr(),
         chart1,
         ],
     )
@@ -129,23 +125,32 @@ p110_layout = html.Div(
 
 @app.callback(
     Output('input_VNT_KL_p110', 'options'),
-    [Input('input_T1_p110', 'value')]
+    [
+    Input('input_T1_p110', 'value'),
+    # Input('input_T2_p110', 'value'),
+    # Input('input_T3_p110', 'value'),
+    ]
 )
-def set_vnt_KL_options(T1_value):
-    #
-    D  = T1_value.split('_')[0]
-    SW = T1_value.split('_')[1].split('JE')[0]
-    SJ = T1_value.split('_')[1].split('JE')[1]
-    #
-    table = '{}_SJI'.format(T1_value.rsplit('_',1)[0])
-    df_sji = pd.read_sql_query(
-        'SELECT * FROM {};'.format(table),
-        app.db_conn,
-        )
-    #
-    VNT_KL_list = df_sji[vKLcol].unique()
-    VNT_KL_options = [{'label': '{}'.format(x), 'value': x} for x in VNT_KL_list ]
-    return VNT_KL_options
+def set_vnt_KL_options(T_value):
+    T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
+    for D_SWSJ_HR in T_value:
+        try:
+            D  = D_SWSJ_HR.split('_')[0]
+            SW = D_SWSJ_HR.split('_')[1].split('JE')[0]
+            SJ = D_SWSJ_HR.split('_')[1].split('JE')[1]
+            #
+            table = '{}_SJI'.format(D_SWSJ_HR.rsplit('_',1)[0])
+            df_sji = pd.read_sql_query(
+                'SELECT * FROM {};'.format(table),
+                app.db_conn,
+                )
+            #
+            VNT_KL_list = df_sji[vKLcol].unique()
+            VNT_KL_options = [{'label': '{}'.format(x), 'value': x} for x in VNT_KL_list ]
+            return VNT_KL_options
+        except:
+            return [{'label': '{}'.format(x), 'value': x} for x in ['none'] ]
+
 @app.callback(
     Output('input_VNT_KL_p110', 'value'),
     [Input('input_VNT_KL_p110', 'options')]
@@ -157,25 +162,32 @@ def set_vnt_KL_value(available_options):
 
 @app.callback(
     Output('input_VNT_B_p110', 'options'),
-    [Input('input_T1_p110', 'value')]
+    [
+    Input('input_T1_p110', 'value'),
+    # Input('input_T2_p110', 'value'),
+    # Input('input_T3_p110', 'value'),
+    ]
 )
-def set_vnt_B_options(T1_value):
-    #
-    print(T1_value)
-    D  = T1_value.split('_')[0]
-    SW = T1_value.split('_')[1].split('JE')[0]
-    SJ = T1_value.split('_')[1].split('JE')[1]
-    #
-    table = '{}_SJI'.format(T1_value.rsplit('_',1)[0])
-    df_sji = pd.read_sql_query(
-        'SELECT * FROM {};'.format(table),
-        app.db_conn,
-        )
-    #
-    VNT_B_list = df_sji[vBcol].unique()
-    VNT_B_options = [{'label': '{}'.format(x), 'value': x} for x in VNT_B_list ]
-    return VNT_B_options
-#
+def set_vnt_B_options(T_value):
+    T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
+    for D_SWSJ_HR in T_value:
+        try:
+            D  = D_SWSJ_HR.split('_')[0]
+            SW = D_SWSJ_HR.split('_')[1].split('JE')[0]
+            SJ = D_SWSJ_HR.split('_')[1].split('JE')[1]
+            #
+            table = '{}_SJI'.format(D_SWSJ_HR.rsplit('_',1)[0])
+            df_sji = pd.read_sql_query(
+                'SELECT * FROM {};'.format(table),
+                app.db_conn,
+                )
+            #
+            VNT_B_list = df_sji[vBcol].unique()
+            VNT_B_options = [{'label': '{}'.format(x), 'value': x} for x in VNT_B_list ]
+            return VNT_B_options
+        except:
+            return [{'label': '{}'.format(x), 'value': x} for x in ['none'] ]
+
 @app.callback(
     Output('input_VNT_B_p110', 'value'),
     [Input('input_VNT_B_p110', 'options')]
@@ -192,8 +204,8 @@ def set_vnt_B_value(available_options):
     Output('p110_hr_LineChart', 'figure'),
     [
         Input('input_T1_p110', 'value'),
-        Input('input_T2_p110', 'value'),
-        Input('input_T3_p110', 'value'),
+        # Input('input_T2_p110', 'value'),
+        # Input('input_T3_p110', 'value'),
         Input('input_W1_p110', 'value'), Input('input_W2_p110', 'value'),
         Input('input_F_p110', 'value'), Input('input_N_p110', 'value'),
         Input('input_VNT_B_p110', 'value'), Input('input_VNT_KL_p110', 'value'),
@@ -203,7 +215,10 @@ def set_vnt_B_value(available_options):
     ]
     )
 def update_chart_scatter_p110(
-    T1_value, T2_value, T3_value,
+    # T1_value,
+    # T2_value,
+    # T3_value,
+    T_value,
     W1_value, W2_value,
     F_value, N_value,
     VNT_B_value, VNT_KL_value,
@@ -221,84 +236,100 @@ def update_chart_scatter_p110(
     W_value = '{}{}'.format(W1_value, W2_value)
 
 #
-    dict_line = {1:'dot', 2:'dash', 3:'dashdot'}
+    dict_line = {1:'', 2:'dot', 3:'dash', 4:'dashdot'}
     i = 0
-    for SW_D_SJ in [T1_value, T2_value, T3_value]:
-        print(SW_D_SJ)
+    T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
+    # for D_SWSJ_HR in [T1_value, T2_value, T3_value]:
+    for D_SWSJ_HR in T_value:
+        print(D_SWSJ_HR)
         i=i+1
 
-        # try:
-        D  = SW_D_SJ.split('_')[0]
-        SW = SW_D_SJ.split('_')[1]
-        # SW = SW_D_SJ.split('_')[1].split('JE')[0]
-        # SJ = SW_D_SJ.split('_')[1].split('JE')[1]
-        print(D)
-        print(SW)
+        try:
+            D  = D_SWSJ_HR.split('_')[0]
+            SWSJ = D_SWSJ_HR.split('_')[1]
+            # SW = D_SWSJ_HR.split('_')[1].split('JE')[0]
+            # SJ = D_SWSJ_HR.split('_')[1].split('JE')[1]
 
-#
-        df_hr = pd.DataFrame()
-        if 'OSJE' in SW:
+    #
+            # df_hr = pd.DataFrame()
+            if 'OSJE' in SWSJ:
 
-            table = SW_D_SJ
-            df_hr = pd.read_sql_query(
-                con = app.db_conn,
-                sql = """SELECT * FROM {table}
-                    WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
-                    AND `{Ncol}` = '{N}'
-                    AND `{vBcol}` = '{VNT_B}' AND `{vKLcol}` = '{VNT_KL}'
+                table = D_SWSJ_HR
+                df_hr = pd.read_sql_query(
+                    con = app.db_conn,
+                    sql = """SELECT * FROM {table}
+                        WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+                        AND `{Ncol}` = '{N}'
+                        AND `{vBcol}` = '{VNT_B}' AND `{vKLcol}` = '{VNT_KL}'
+                        AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
+                        AND `{Gcol}` = '{G}'
+                        ;""".format(
+                            table=table,
+                            Wcol=Wcol, W=W_value,   Fcol=Fcol, F=F_value, Ncol=Ncol, N=N_value,
+                            vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
+                            wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
+                            Gcol=Gcol, G=G_value,
+                            ),
+                    )
+                #
+                df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
+                df_hr.set_index('datetime', inplace=True)
+                df_hr.sort_index(axis=0, inplace=True)
+                df_hr = df_hr[start_date:end_date]
+                print(df_hr.shape)
+
+                traces_hr += dash_HR_add_traces_EXT(
+                    df=df_hr,
+                    group='EXT',
+                    linewidth=1.5,
+                    )    
+                traces_hr += dash_HR_add_traces(
+                    df=df_hr,
+                    group=SWSJ,
+                    room=room,
+                    linewidth=1.2,
+                    dash_style=dict_line[i],
+                    )
+    #
+
+            else:
+
+                table = D_SWSJ_HR
+                df_hr = pd.read_sql_query(
+                    con = app.db_conn,
+                    sql = """SELECT * FROM {table}
+                    WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
                     AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
                     AND `{Gcol}` = '{G}'
-                    ;""".format(
-                        table=table,
-                        Wcol=Wcol, W=W_value,   Fcol=Fcol, F=F_value, Ncol=Ncol, N=N_value,
-                        vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
+                    """.format(table=table,
+                        Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
                         wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
                         Gcol=Gcol, G=G_value,
                         ),
-                )
-            #
-            traces_hr += dash_HR_add_traces_EXT(
-                df=df_hr,
-                group='EXT',
-                linewidth=1.5,
-                )    
-
-        else:
-            table = SW_D_SJ
-            df_hr = pd.read_sql_query(
-                con = app.db_conn,
-                sql = """SELECT * FROM {table}
-                WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}' AND `{Ncol}` = '{N}'
-                AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
-                AND `{Gcol}` = '{G}'
-                """.format(table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol,F=F_value, Ncol=Ncol,N=N_value,
-                    wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
-                    Gcol=Gcol, G=G_value,
-                    ),
-                )
+                    )
 #
-
-        df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
-        df_hr.set_index('datetime', inplace=True)
-        df_hr.sort_index(axis=0, inplace=True)
-        df_hr = df_hr[start_date:end_date]
-        print(df_hr.shape)
-        
-        traces_hr += dash_HR_add_traces(
-            df=df_hr,
-            group=S,
-            room=room,
-            linewidth=1.2,
-            dash_style=dict_line[i],
-            )
+                df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
+                df_hr.set_index('datetime', inplace=True)
+                df_hr.sort_index(axis=0, inplace=True)
+                df_hr = df_hr[start_date:end_date]
+                print(df_hr.shape)
+                
+                traces_hr += dash_HR_add_traces(
+                    df=df_hr,
+                    group=SWSJ,
+                    room=room,
+                    linewidth=1.2,
+                    dash_style=dict_line[i],
+                    )
+        except:
+            print('Data not available')
 
         print('\n\t{0:.3f} seconds'.format(time.time()-start_time) )
 
 
 
     #####
-    layout_hr = create_layout_EP_IES_HR(D_value=D_value, F_value=F_value, room=room)
+    layout_hr = create_layout_EP_IES_HR(D_value=D, F_value=F, room=room)
     fig_hr = go.Figure(
         data=traces_hr,
         layout=layout_hr,
