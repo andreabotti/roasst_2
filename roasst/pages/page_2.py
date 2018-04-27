@@ -51,7 +51,7 @@ input_menus = html.Div(
             ),
         dash_create_menu_weather(
             menu_id=['W1_input(p2)','W2_input(p2)'],
-            widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
+            width='one', WEATHER_FILES=WEATHER_FILES,
             ),
         dash_create_menu_floor(menu_id='F_input(p2)', col=Fcol,
             width='one', df=df_sji,
@@ -69,7 +69,8 @@ input_menus = html.Div(
             width='one', df=df_sji,
             ),
         dash_create_menu_rooms(menu_id='R_input(p2)', width='one', ROOMS=ROOMS),
-        dash_create_menu_datepickerrange(menu_id='input_date_p2', width='one'),
+        dash_create_menu_datepickerrange(menu_id='input_date_p2',
+            fontsize=11, width='one'),
         dash_create_menu_textinput(
             menu_id=[
                 'trace_group_1_input(p2)',

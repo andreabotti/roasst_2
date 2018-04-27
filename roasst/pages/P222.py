@@ -3,6 +3,7 @@ import os
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
+import json
 
 from roasst.app import app
 from roasst.config import *
@@ -60,8 +61,9 @@ def assign_trace_fill_outline(D, R):
 
     return trace_fill, trace_outline
 
-
-
+DEFAULT_COLORSCALE = ["#2a4858", "#265465", "#1e6172", "#106e7c", "#007b84", \
+    "#00898a", "#00968e", "#19a390", "#31b08f", "#4abd8c", "#64c988", \
+    "#80d482", "#9cdf7c", "#bae976", "#d9f271", "#fafa6e"]
 
 # I need to query one database with simulation results to populate the menus
 D = 'P1201'
@@ -71,37 +73,34 @@ platform = 'DSBJE'
 table = 'TEMPLATE_SJI'
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table), app.db_conn)
 
+#
 
+TABLES = []
+q = app.db_conn.execute('SHOW TABLES')
+for (table_name,) in q.fetchall():
+        TABLES.append(table_name)
+TABLES_RP = [T for T in TABLES if '_RP' in T]
 
-#####
+#
+
 chart_KL = html.Div(
     className='six columns',#    style={'padding': '10 10 10 10'},
     children=[
-        dcc.Graph(
-            id='chart_bars_KL(p3)',
-            style={'height': '700px'},
-            figure={},
-            ),
+        dcc.Graph(id='P222_RP_BarChart_KL',   style={'height': '800px'},  figure={},),
         ],
     )
 chart_BD1 = html.Div(
     className='six columns',#    style={'padding': '10 10 10 10'},
     children=[
-        dcc.Graph(
-            id='chart_bars_BD1(p3)',
-            style={'height': '700px'},
-            figure={},
-            ),
+        dcc.Graph(id='P222_RP_BarChart_BD1',  style={'height': '800px'},  figure={},),
         ],
     )
 charts = html.Div(
-    className='row',
-    style={
-        # 'background-color': '#F3F3F3',
-        'font-family': 'overpass',
-        'width': '100%',
-        'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
-        },
+    # className='row',
+    # style={
+    #     'font-family': 'overpass', 'width': '100%',
+    #     'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
+    #     },
     children=[
         chart_KL,
         chart_BD1,
@@ -109,75 +108,110 @@ charts = html.Div(
     )
 
 #
-
+app.scripts.config.serve_locally = True
 input_menus = html.Div(
-    className='row',
+    # className='row',
     style={
         'margin': '0 0 0 0', 'padding': '10',
-        'font-size': 13,
+        'font-size': 12,
     },
     children=[
-        dash_create_menu_dwelling(
-            menu_id='D_input(p3)', width='two',
-            menu_type='dropdown', DWELLINGS=DWELLINGS),
+        dash_create_menu_table_1field(
+            tables=TABLES_RP, multi=True,
+            menu_id='input_T1_P222',
+            width='row', height='300px'
+            ),
+        html.Hr(
+            style={'margin': '0 0 0 0'},
+            ),
         dash_create_menu_weather(
-            menu_id=['W1_input(p3)', 'W2_input(p3)'], width='one',
-            WEATHER_FILES=WEATHER_FILES),
+            menu_id=['input_W1_P222','input_W2_P222'],
+            width='row', WEATHER_FILES=WEATHER_FILES,
+            ),
+        html.Hr(
+            style={'margin': '0 0 0 0'},
+            ),
         dash_create_menu_floor(
-            menu_id='F_input(p3)', col=Fcol,
-            width='one', df=df_sji),
-        # dash_create_menu_north(menu_id='N_input(p3)',  width='one',
-        #     df=df_sji,),
-        dash_create_menu_vnt(
-            menu_id=['VNT_KL_input(p3)', 'VNT_B_input(p3)'],
-            cols=[vBcol, vKLcol], width='two', df=df_sji),
-        dash_create_menu_window_width(
-            menu_id=['WW_KL_input(p3)', 'WW_B_input(p3)'],
-            cols=[wwBcol, wwKLcol], width='one', df=df_sji),
-        dash_create_menu_glazing(
-            menu_id='G_input(p3)', col=Gcol,
-            width='one', df=df_sji),
+            menu_id='input_F_P222', col=Fcol,
+            width='row', df=df_sji,
+            ),
+        dash_create_menu_vnt(df=df_sji,
+            menu_id=['input_VNT_KL_P222','input_VNT_B_P222'],
+            cols=[vBcol,vKLcol],
+            width='row', 
+            ),
+        html.Hr(
+            style={'margin': '0 0 0 0'},
+            ),
+        dash_create_menu_window_width(df=df_sji,
+            menu_id=['input_WW_KL_P222','input_WW_B_P222'],
+            cols=[wwBcol,wwKLcol],
+            width='row',
+            ),
+        html.Hr(
+            style={'margin': '0 0 0 0'},
+            ),
+        dash_create_menu_glazing(df=df_sji,
+            menu_id='input_G_P222', col=Gcol,
+            width='row', 
+            ),
+        html.Hr(
+            style={'margin': '0 0 0 0'},
+            ),
         dash_create_menu_OH_criterion(
-            menu_id='crit_input(p3)', width='one',
-            )
+            menu_id='input_crit_P222',
+            width='row',
+            ),
     ],
 )
 
 #
-
-page_3_layout = html.Div(
+P222_layout = html.Div(
     className='row',
     style={
-        # 'background-color': '#F3F3F3',
-        'font-family': 'overpass',  # 'font-size':11,
-        'height': '1000px', 'width': '100%',    # 'max-width': '1800',
-        'margin': '20 0 0 0', 'padding': '0 0 0 0',
+        # 'font-family': 'overpass',  # 'font-size':11,
+        'height': '100%',    # '1000px',
+        'width': '100%',    # 'max-width': '1800',
+        'margin': '0 0 0 0', 'padding': '0 0 0 0',
         },
+
     children = [
-        page_title,
-        input_menus,
-        html.Hr(),
-        charts,
-        ],
+        html.Div(
+            className='two columns',
+            style={
+                'background-color': '#F3F3F3',
+                # 'font-size': 11,
+                'font-family': 'overpass',  # 'font-size':11,
+                # 'height': '1000px', 'width': '100%',    # 'max-width': '1800',
+                'margin': '0 0 0 0', 'padding': '0 0 0 0',
+                },
+            children = [ input_menus ],
+            ),
+        html.Div(
+            className='ten columns',
+            children = [
+                html.H5('CHARTS'),
+                charts,
+                ],
+            ),
+        ]
     )
 
-
 #
-
-
 @app.callback(
-    Output('chart_bars_KL(p3)', 'figure'),
+    Output('P222_RP_BarChart_KL', 'figure'),
     [
-    Input('D_input(p3)', 'value'),
-    Input('W1_input(p3)', 'value'), Input('W2_input(p3)', 'value'),
-    Input('F_input(p3)', 'value'),
-    Input('VNT_B_input(p3)', 'value'), Input('VNT_KL_input(p3)', 'value'),
-    Input('WW_B_input(p3)', 'value'), Input('WW_KL_input(p3)', 'value'),
-    Input('G_input(p3)', 'value'),
-    Input('crit_input(p3)', 'value'),
+        Input('input_T1_P222', 'value'),
+        Input('input_W1_P222', 'value'), Input('input_W2_P222', 'value'),
+        Input('input_F_P222', 'value'),
+        Input('input_VNT_B_P222', 'value'), Input('input_VNT_KL_P222', 'value'),
+        Input('input_WW_B_P222', 'value'), Input('input_WW_KL_P222', 'value'),
+        Input('input_G_P222', 'value'),
+        Input('input_crit_P222', 'value'),
     ])
-def update_chart_bar_runperiod_KL(
-    D_value,
+
+def update_P222_RP_BarChart_KL(
+    T_value,
     W1_value, W2_value,
     F_value,
     VNT_B_value, VNT_KL_value,
@@ -190,7 +224,6 @@ def update_chart_bar_runperiod_KL(
 
     import time
     start_time = time.time()
-    print(start_time)
     
     bar_subplots_rp_multiroom = tools.make_subplots(
         rows=3, cols=3,
@@ -222,21 +255,17 @@ def update_chart_bar_runperiod_KL(
 
     N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
     #    
-    D_value = [D_value] if type(D_value).__name__ == 'str' else D_value
+    T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
     W_value = '{}{}'.format(W1_value, W2_value)
     #
-    # table = 'ALL_{}_RP'.format(D, SIM_JOBS)
-    print(D_value)
-
     
     df_D = pd.DataFrame()
-    for D in D_value:
-        F = F_value;
-        D_F = '{}_{}'.format(D, F_value)
-
-        table = '{}_{}_{}_RP'.format(platform,D, SIM_JOBS)
+    for T in T_value:
+        D  = T.split('_')[0]
+        SWSJ = T.split('_')[1]
+        table = T
         print(table)
-        if platform=='OSJE':
+        if 'OSJE' in T:
             df_rp = pd.read_sql_query(
                 con=app.db_conn,
                 sql="""SELECT * FROM {table}
@@ -246,22 +275,26 @@ def update_chart_bar_runperiod_KL(
                     AND `{Gcol}` = '{G}'
                     ;""".format(
                     table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+                    Wcol=Wcol, W=W_value,
+                    Fcol=Fcol, F=F_value,
                     vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
                     wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
                     Gcol=Gcol, G=G_value,
                 ),
             )
-        elif platform=='DSBJE':
+        elif 'DSBJE' in T:
             df_rp = pd.read_sql_query(
                 con=app.db_conn,
                 sql="""SELECT * FROM {table}
                     WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
                     AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
+                    AND `{Gcol}` = '{G}'
                     ;""".format(
                     table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+                    Wcol=Wcol, W=W_value,
+                    Fcol=Fcol, F=F_value,
                     wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
+                    Gcol=Gcol, G=G_value,
                 ),
             )
         print('df_rp: {}'.format(df_rp.shape))
@@ -274,11 +307,17 @@ def update_chart_bar_runperiod_KL(
             pos = dict_subplot_pos[N]
             row,col= [ int(x) for x in pos.split(',') ]    
 
-            x = df_N['{}_{}'.format(R, crit_value)]
+            if 'HA' in crit_value:
+                crit = crit_value.split('_')[1]
+            else:
+                crit = crit_value
+            #
+            x = df_N['{}_{}'.format(R, crit)]
             y = df_N['@dwelling']
             trace_name = '{}|{}'.format(D,R)
-            # x = trace_name
-            trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
+            # trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
             trace_bar = go.Bar(
                 x=x,
                 y=y,
@@ -286,10 +325,12 @@ def update_chart_bar_runperiod_KL(
                 yaxis='y{}'.format(col),
                 orientation='h',
                 # width=bar_width,
-                marker=dict(
-                    color=trace_fill,
-                    line=dict(color=trace_outline, width=1.5),
-                    ),
+#
+                # marker=dict(
+                #     color=trace_fill,
+                #     line=dict(color=trace_outline, width=1.5),
+                #     ),
+#
                 name=trace_name,
                 text='<b>{}</b>'.format(R),
                 textfont=dict(
@@ -308,18 +349,19 @@ def update_chart_bar_runperiod_KL(
 
 
 @app.callback(
-    Output('chart_bars_BD1(p3)', 'figure'),
+    Output('P222_RP_BarChart_BD1', 'figure'),
     [
-    Input('D_input(p3)', 'value'),
-    Input('W1_input(p3)', 'value'), Input('W2_input(p3)', 'value'),
-    Input('F_input(p3)', 'value'),
-    Input('VNT_B_input(p3)', 'value'), Input('VNT_KL_input(p3)', 'value'),
-    Input('WW_B_input(p3)', 'value'), Input('WW_KL_input(p3)', 'value'),
-    Input('G_input(p3)', 'value'),
-    Input('crit_input(p3)', 'value'),
+        Input('input_T1_P222', 'value'),
+        Input('input_W1_P222', 'value'), Input('input_W2_P222', 'value'),
+        Input('input_F_P222', 'value'),
+        Input('input_VNT_B_P222', 'value'), Input('input_VNT_KL_P222', 'value'),
+        Input('input_WW_B_P222', 'value'), Input('input_WW_KL_P222', 'value'),
+        Input('input_G_P222', 'value'),
+        Input('input_crit_P222', 'value'),
     ])
-def update_chart_bar_runperiod_BD1(
-    D_value,
+
+def update_P222_RP_BarChart_BD1(
+    T_value,
     W1_value, W2_value,
     F_value,
     VNT_B_value, VNT_KL_value,
@@ -332,7 +374,6 @@ def update_chart_bar_runperiod_BD1(
 
     import time
     start_time = time.time()
-    print(start_time)
     
     bar_subplots_rp_multiroom = tools.make_subplots(
         rows=3, cols=3,
@@ -364,21 +405,17 @@ def update_chart_bar_runperiod_BD1(
 
     N_angle_dict = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'}
     #    
-    D_value = [D_value] if type(D_value).__name__ == 'str' else D_value
+    T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
     W_value = '{}{}'.format(W1_value, W2_value)
     #
-    # table = 'ALL_{}_RP'.format(D, SIM_JOBS)
-    print(D_value)
-
     
     df_D = pd.DataFrame()
-    for D in D_value:
-        F = F_value;
-        D_F = '{}_{}'.format(D, F_value)
-
-        table = '{}_{}_{}_RP'.format(platform,D, SIM_JOBS)
+    for T in T_value:
+        D  = T.split('_')[0]
+        SWSJ = T.split('_')[1]
+        table = T
         print(table)
-        if platform=='OSJE':
+        if 'OSJE' in T:
             df_rp = pd.read_sql_query(
                 con=app.db_conn,
                 sql="""SELECT * FROM {table}
@@ -388,22 +425,26 @@ def update_chart_bar_runperiod_BD1(
                     AND `{Gcol}` = '{G}'
                     ;""".format(
                     table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+                    Wcol=Wcol, W=W_value,
+                    Fcol=Fcol, F=F_value,
                     vBcol=vBcol, VNT_B=VNT_B_value, vKLcol=vKLcol, VNT_KL=VNT_KL_value,
                     wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
                     Gcol=Gcol, G=G_value,
                 ),
             )
-        elif platform=='DSBJE':
+        elif 'DSBJE' in T:
             df_rp = pd.read_sql_query(
                 con=app.db_conn,
                 sql="""SELECT * FROM {table}
                     WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
                     AND `{wwBcol}` = '{WW_B}' AND `{wwKLcol}` = '{WW_KL}'
+                    AND `{Gcol}` = '{G}'
                     ;""".format(
                     table=table,
-                    Wcol=Wcol, W=W_value, Fcol=Fcol, F=F_value,
+                    Wcol=Wcol, W=W_value,
+                    Fcol=Fcol, F=F_value,
                     wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
+                    Gcol=Gcol, G=G_value,
                 ),
             )
         print('df_rp: {}'.format(df_rp.shape))
@@ -416,11 +457,17 @@ def update_chart_bar_runperiod_BD1(
             pos = dict_subplot_pos[N]
             row,col= [ int(x) for x in pos.split(',') ]    
 
-            x = df_N['{}_{}'.format(R, crit_value)]
+            if 'HA' in crit_value:
+                crit = crit_value.split('_')[0]
+            else:
+                crit = crit_value
+            #
+            x = df_N['{}_{}'.format(R, crit)]
             y = df_N['@dwelling']
             trace_name = '{}|{}'.format(D,R)
-            # x = trace_name
-            trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
+            # trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
             trace_bar = go.Bar(
                 x=x,
                 y=y,
@@ -428,10 +475,12 @@ def update_chart_bar_runperiod_BD1(
                 yaxis='y{}'.format(col),
                 orientation='h',
                 # width=bar_width,
-                marker=dict(
-                    color=trace_fill,
-                    line=dict(color=trace_outline, width=1.5),
-                    ),
+#
+                # marker=dict(
+                #     color=trace_fill,
+                #     line=dict(color=trace_outline, width=1.5),
+                #     ),
+#
                 name=trace_name,
                 text='<b>{}</b>'.format(R),
                 textfont=dict(
@@ -444,4 +493,3 @@ def update_chart_bar_runperiod_BD1(
     
 
     return bar_subplots_rp_multiroom
-

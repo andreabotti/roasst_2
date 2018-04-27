@@ -62,7 +62,7 @@ input_menus = html.Div(
     children=[
         dash_create_menu_dwelling(menu_id='D_input(p1)',
                               width='two', menu_type='radio', DWELLINGS=DWELLINGS),
-        dash_create_menu_weather(menu_id=['W1_input(p1)', 'W2_input(p1)'], widths=['one', 'one'],
+        dash_create_menu_weather(menu_id=['W1_input(p1)', 'W2_input(p1)'], width='one',
                                  WEATHER_FILES=WEATHER_FILES),
         dash_create_menu_floor(menu_id='F_input(p1)', col=Fcol,
                                width='one', df=df_sji),

@@ -56,47 +56,39 @@ input_menus = html.Div(
         },
     children=[
         dash_create_menu_table_1field(
-            tables=TABLES_HR,
-            multi=True,
-            menu_id='input_T1_p110',
-            width='two',
+            tables=TABLES_HR, multi=True,
+            menu_id='input_T1_P111',
+            width='two', height='',
             ),
-        # dash_create_menu_table_3fields(
-        #     tables=TABLES_HR,
-        #     multi=False,
-        #     menu_id=['input_T1_p110','input_T2_p110','input_T3_p110'],
-        #     width='two',
-        #     ),
-
         dash_create_menu_weather(
-            menu_id=['input_W1_p110','input_W2_p110'],
-            widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
+            menu_id=['input_W1_P111','input_W2_P111'],
+            width='one', WEATHER_FILES=WEATHER_FILES,
             ),
-        dash_create_menu_floor(menu_id='input_F_p110', col=Fcol,
+        dash_create_menu_floor(menu_id='input_F_P111', col=Fcol,
             width='one', df=df_sji,
             ),
-        dash_create_menu_north(menu_id='input_N_p110', col=Ncol,
+        dash_create_menu_north(menu_id='input_N_P111', col=Ncol,
             width='one', df=df_sji,
             ),
-        dash_create_menu_vnt(menu_id=['input_VNT_KL_p110','input_VNT_B_p110'],
+        dash_create_menu_vnt(menu_id=['input_VNT_KL_P111','input_VNT_B_P111'],
             cols=[vBcol,vKLcol], width='two', df=df_sji,
             ),
-        dash_create_menu_window_width(menu_id=['input_WW_KL_p110','input_WW_B_p110'],
+        dash_create_menu_window_width(menu_id=['input_WW_KL_P111','input_WW_B_P111'],
             cols=[wwBcol,wwKLcol], width='one', df=df_sji,
             ),
-        dash_create_menu_glazing(menu_id='input_G_p110', col=Gcol,
+        dash_create_menu_glazing(menu_id='input_G_P111', col=Gcol,
             width='one', df=df_sji,
             ),
-        dash_create_menu_rooms(menu_id='input_R_p110', width='one', ROOMS=ROOMS),
-        dash_create_menu_datepickerrange(menu_id='input_date_p110', width='one'),
+        dash_create_menu_rooms(menu_id='input_R_P111', width='one', ROOMS=ROOMS),
+        dash_create_menu_datepickerrange(menu_id='input_date_P111',
+            fontsize=12, width='one'),
         ],
     )
-
 #
 chart1 = html.Div(
     children=[
         dcc.Graph(
-            id='p110_hr_LineChart',
+            id='P111_hr_LineChart',
             figure={},
             style={'height': '680px'},
             ),
@@ -105,7 +97,7 @@ chart1 = html.Div(
 
 #####
 
-p110_layout = html.Div(
+P111_layout = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
@@ -114,21 +106,21 @@ p110_layout = html.Div(
         'margin': '20 0 0 0', 'padding': '0 0 0 0',
         },
     children = [
-        page_title,
+        # page_title,
         input_menus,
         # html.Hr(),
         chart1,
         ],
     )
 
-#####
+#
 
 @app.callback(
-    Output('input_VNT_KL_p110', 'options'),
+    Output('input_VNT_KL_P111', 'options'),
     [
-    Input('input_T1_p110', 'value'),
-    # Input('input_T2_p110', 'value'),
-    # Input('input_T3_p110', 'value'),
+    Input('input_T1_P111', 'value'),
+    # Input('input_T2_P111', 'value'),
+    # Input('input_T3_P111', 'value'),
     ]
 )
 def set_vnt_KL_options(T_value):
@@ -152,8 +144,8 @@ def set_vnt_KL_options(T_value):
             return [{'label': '{}'.format(x), 'value': x} for x in ['none'] ]
 
 @app.callback(
-    Output('input_VNT_KL_p110', 'value'),
-    [Input('input_VNT_KL_p110', 'options')]
+    Output('input_VNT_KL_P111', 'value'),
+    [Input('input_VNT_KL_P111', 'options')]
 )
 def set_vnt_KL_value(available_options):
     return available_options[0]['value'] 
@@ -161,11 +153,11 @@ def set_vnt_KL_value(available_options):
 #
 
 @app.callback(
-    Output('input_VNT_B_p110', 'options'),
+    Output('input_VNT_B_P111', 'options'),
     [
-    Input('input_T1_p110', 'value'),
-    # Input('input_T2_p110', 'value'),
-    # Input('input_T3_p110', 'value'),
+    Input('input_T1_P111', 'value'),
+    # Input('input_T2_P111', 'value'),
+    # Input('input_T3_P111', 'value'),
     ]
 )
 def set_vnt_B_options(T_value):
@@ -189,8 +181,8 @@ def set_vnt_B_options(T_value):
             return [{'label': '{}'.format(x), 'value': x} for x in ['none'] ]
 
 @app.callback(
-    Output('input_VNT_B_p110', 'value'),
-    [Input('input_VNT_B_p110', 'options')]
+    Output('input_VNT_B_P111', 'value'),
+    [Input('input_VNT_B_P111', 'options')]
 )
 #
 def set_vnt_B_value(available_options):
@@ -201,20 +193,20 @@ def set_vnt_B_value(available_options):
 
 
 @app.callback(
-    Output('p110_hr_LineChart', 'figure'),
+    Output('P111_hr_LineChart', 'figure'),
     [
-        Input('input_T1_p110', 'value'),
-        # Input('input_T2_p110', 'value'),
-        # Input('input_T3_p110', 'value'),
-        Input('input_W1_p110', 'value'), Input('input_W2_p110', 'value'),
-        Input('input_F_p110', 'value'), Input('input_N_p110', 'value'),
-        Input('input_VNT_B_p110', 'value'), Input('input_VNT_KL_p110', 'value'),
-        Input('input_WW_B_p110', 'value'), Input('input_WW_KL_p110', 'value'),
-        Input('input_G_p110', 'value'), Input('input_R_p110', 'value'),
-        Input('input_date_p110', 'start_date'), Input('input_date_p110', 'end_date'),
+        Input('input_T1_P111', 'value'),
+        # Input('input_T2_P111', 'value'),
+        # Input('input_T3_P111', 'value'),
+        Input('input_W1_P111', 'value'), Input('input_W2_P111', 'value'),
+        Input('input_F_P111', 'value'), Input('input_N_P111', 'value'),
+        Input('input_VNT_B_P111', 'value'), Input('input_VNT_KL_P111', 'value'),
+        Input('input_WW_B_P111', 'value'), Input('input_WW_KL_P111', 'value'),
+        Input('input_G_P111', 'value'), Input('input_R_P111', 'value'),
+        Input('input_date_P111', 'start_date'), Input('input_date_P111', 'end_date'),
     ]
     )
-def update_chart_scatter_p110(
+def update_chart_scatter_P111(
     # T1_value,
     # T2_value,
     # T3_value,
@@ -308,6 +300,7 @@ def update_chart_scatter_p110(
                         ),
                     )
 #
+                print(df_hr[:2])
                 df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
                 df_hr.set_index('datetime', inplace=True)
                 df_hr.sort_index(axis=0, inplace=True)
@@ -316,7 +309,7 @@ def update_chart_scatter_p110(
                 
                 traces_hr += dash_HR_add_traces(
                     df=df_hr,
-                    group=SWSJ,
+                    group=D_SWSJ_HR,
                     room=room,
                     linewidth=1.2,
                     dash_style=dict_line[i],

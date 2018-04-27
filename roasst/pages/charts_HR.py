@@ -20,7 +20,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table_experiments as dt
+# import dash_table_experiments as dt
 
 
 
@@ -251,15 +251,14 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
     
     layout_hr = go.Layout(
         margin=go.Margin(l=60, r=40, b=40, t=40),
-        title='<i>unit</i>: <b>{D}</b> | <i>floor</i>: <b>{F}</b>' \
-            ' |  <i>room</i>: <b>{R}</b>'.format(D=D_value,F=F_value,R=room),
+        title='floor: <b>{F}</b> | room: <b>{R}</b>'.format(F=F_value,R=room),
         yaxis1=dict(
             domain=[0, 0.12], range=[0,8], dtick=2, showgrid=False,
             #
             title='<b>NAT. VENT.<br>(ACH)</b>',
             titlefont=dict(
                 family='Calibri Light,sans-serif',
-                size=15,
+                size=12,
                 color='grey'
                 ),
             showticklabels=True,

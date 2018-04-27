@@ -3,6 +3,7 @@ import os
 import pandas as pd, numpy as np
 from pandas import *
 import datetime as dt
+import json
 
 from roasst.app import app
 from roasst.config import *
@@ -60,8 +61,9 @@ def assign_trace_fill_outline(D, R):
 
     return trace_fill, trace_outline
 
-
-
+DEFAULT_COLORSCALE = ["#2a4858", "#265465", "#1e6172", "#106e7c", "#007b84", \
+    "#00898a", "#00968e", "#19a390", "#31b08f", "#4abd8c", "#64c988", \
+    "#80d482", "#9cdf7c", "#bae976", "#d9f271", "#fafa6e"]
 
 # I need to query one database with simulation results to populate the menus
 D = 'P1201'
@@ -81,69 +83,22 @@ TABLES_RP = [T for T in TABLES if '_RP' in T]
 
 #
 
-input_menus = html.Div(
-    className='row',
-    style={
-        'margin': '0 0 0 0', 'padding': '10',
-        'font-size': 13,
-    },
-    children=[
-        dash_create_menu_table_1field(
-            tables=TABLES_RP,
-            multi=True,
-            menu_id='input_T1_p220',
-            width='two',
-            ),
-        dash_create_menu_weather(
-            menu_id=['input_W1_p220','input_W2_p220'],
-            widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
-            ),
-        dash_create_menu_floor(
-            menu_id='input_F_p220', col=Fcol,
-            width='one', df=df_sji,
-            ),
-        dash_create_menu_vnt(menu_id=['input_VNT_KL_p220','input_VNT_B_p220'],
-            cols=[vBcol,vKLcol], width='two', df=df_sji,
-            ),
-        dash_create_menu_window_width(menu_id=['input_WW_KL_p220','input_WW_B_p220'],
-            cols=[wwBcol,wwKLcol], width='one', df=df_sji,
-            ),
-        dash_create_menu_glazing(menu_id='input_G_p220', col=Gcol,
-            width='one', df=df_sji,
-            ),
-        dash_create_menu_OH_criterion(
-            menu_id='input_crit_p220', width='one',
-            )
-    ],
-)
-
-#
-#####
 chart_KL = html.Div(
     className='six columns',#    style={'padding': '10 10 10 10'},
     children=[
-        dcc.Graph(
-            id='P220_RP_BarChart_KL',
-            style={'height': '650px'},
-            figure={},
-            ),
+        dcc.Graph(id='P221_RP_BarChart_KL',   style={'height': '650px'},  figure={},),
         ],
     )
 chart_BD1 = html.Div(
     className='six columns',#    style={'padding': '10 10 10 10'},
     children=[
-        dcc.Graph(
-            id='P220_RP_BarChart_BD1',
-            style={'height': '650px'},
-            figure={},
-            ),
+        dcc.Graph(id='P221_RP_BarChart_BD1',  style={'height': '650px'},  figure={},),
         ],
     )
 charts = html.Div(
     className='row',
     style={
-        'font-family': 'overpass',
-        'width': '100%',
+        'font-family': 'overpass', 'width': '100%',
         'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
         },
     children=[
@@ -153,8 +108,51 @@ charts = html.Div(
     )
 
 #
+app.scripts.config.serve_locally = True
+input_menus = html.Div(
+    className='row',
+    style={
+        'margin': '0 0 0 0', 'padding': '10',
+        'font-size': 12,
+    },
+    children=[
+        dash_create_menu_table_1field(
+            tables=TABLES_RP, multi=True,
+            menu_id='input_T1_P221',
+            width='four', height='',
+            ),
+        dash_create_menu_weather(
+            menu_id=['input_W1_P221','input_W2_P221'],
+            width='one', WEATHER_FILES=WEATHER_FILES,
+            ),
+        dash_create_menu_floor(
+            menu_id='input_F_P221', col=Fcol,
+            width='one', df=df_sji,
+            ),
+        dash_create_menu_vnt(menu_id=['input_VNT_KL_P221','input_VNT_B_P221'],
+            cols=[vBcol,vKLcol], width='two', df=df_sji,
+            ),
+        dash_create_menu_window_width(menu_id=['input_WW_KL_P221','input_WW_B_P221'],
+            cols=[wwBcol,wwKLcol], width='one', df=df_sji,
+            ),
+        dash_create_menu_glazing(menu_id='input_G_P221', col=Gcol,
+            width='one', df=df_sji,
+            ),
+        dash_create_menu_OH_criterion(
+            menu_id='input_crit_P221', width='one',
+            ),
+        # dash_create_menu_colorscales(
+        #     width='two',
+        #     menu_id='input_colorscale_P221',
+        #     # swatches=len(DEFAULT_COLORSCALE),
+        #     swatches=7,
+        #     # colorscale=DEFAULT_COLORSCALE,
+        #     ),
+    ],
+)
 
-p220_layout = html.Div(
+#
+P221_layout = html.Div(
     className='row',
     style={
         # 'background-color': '#F3F3F3',
@@ -170,22 +168,31 @@ p220_layout = html.Div(
         ],
     )
 
+#
+
+# @app.callback(
+#         Output('color_output', 'children'),
+#         [Input('input_colorscale_P221', 'colorscale')])
+# def display_output(colorscale):
+#     return json.dumps(colorscale)
 
 #
 
+
+#
 @app.callback(
-    Output('P220_RP_BarChart_KL', 'figure'),
+    Output('P221_RP_BarChart_KL', 'figure'),
     [
-        Input('input_T1_p220', 'value'),
-        Input('input_W1_p220', 'value'), Input('input_W2_p220', 'value'),
-        Input('input_F_p220', 'value'),
-        Input('input_VNT_B_p220', 'value'), Input('input_VNT_KL_p220', 'value'),
-        Input('input_WW_B_p220', 'value'), Input('input_WW_KL_p220', 'value'),
-        Input('input_G_p220', 'value'),
-        Input('input_crit_p220', 'value'),
+        Input('input_T1_P221', 'value'),
+        Input('input_W1_P221', 'value'), Input('input_W2_P221', 'value'),
+        Input('input_F_P221', 'value'),
+        Input('input_VNT_B_P221', 'value'), Input('input_VNT_KL_P221', 'value'),
+        Input('input_WW_B_P221', 'value'), Input('input_WW_KL_P221', 'value'),
+        Input('input_G_P221', 'value'),
+        Input('input_crit_P221', 'value'),
     ])
 
-def update_P220_RP_BarChart_KL(
+def update_P221_RP_BarChart_KL(
     T_value,
     W1_value, W2_value,
     F_value,
@@ -282,11 +289,17 @@ def update_P220_RP_BarChart_KL(
             pos = dict_subplot_pos[N]
             row,col= [ int(x) for x in pos.split(',') ]    
 
-            x = df_N['{}_{}'.format(R, crit_value)]
+            if 'HA' in crit_value:
+                crit = crit_value.split('_')[1]
+            else:
+                crit = crit_value
+            #
+            x = df_N['{}_{}'.format(R, crit)]
             y = df_N['@dwelling']
             trace_name = '{}|{}'.format(D,R)
-            # x = trace_name
-            trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
+            # trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
             trace_bar = go.Bar(
                 x=x,
                 y=y,
@@ -294,10 +307,12 @@ def update_P220_RP_BarChart_KL(
                 yaxis='y{}'.format(col),
                 orientation='h',
                 # width=bar_width,
-                marker=dict(
-                    color=trace_fill,
-                    line=dict(color=trace_outline, width=1.5),
-                    ),
+#
+                # marker=dict(
+                #     color=trace_fill,
+                #     line=dict(color=trace_outline, width=1.5),
+                #     ),
+#
                 name=trace_name,
                 text='<b>{}</b>'.format(R),
                 textfont=dict(
@@ -316,18 +331,18 @@ def update_P220_RP_BarChart_KL(
 
 
 @app.callback(
-    Output('P220_RP_BarChart_BD1', 'figure'),
+    Output('P221_RP_BarChart_BD1', 'figure'),
     [
-        Input('input_T1_p220', 'value'),
-        Input('input_W1_p220', 'value'), Input('input_W2_p220', 'value'),
-        Input('input_F_p220', 'value'),
-        Input('input_VNT_B_p220', 'value'), Input('input_VNT_KL_p220', 'value'),
-        Input('input_WW_B_p220', 'value'), Input('input_WW_KL_p220', 'value'),
-        Input('input_G_p220', 'value'),
-        Input('input_crit_p220', 'value'),
+        Input('input_T1_P221', 'value'),
+        Input('input_W1_P221', 'value'), Input('input_W2_P221', 'value'),
+        Input('input_F_P221', 'value'),
+        Input('input_VNT_B_P221', 'value'), Input('input_VNT_KL_P221', 'value'),
+        Input('input_WW_B_P221', 'value'), Input('input_WW_KL_P221', 'value'),
+        Input('input_G_P221', 'value'),
+        Input('input_crit_P221', 'value'),
     ])
 
-def update_P220_RP_BarChart_BD1(
+def update_P221_RP_BarChart_BD1(
     T_value,
     W1_value, W2_value,
     F_value,
@@ -424,11 +439,17 @@ def update_P220_RP_BarChart_BD1(
             pos = dict_subplot_pos[N]
             row,col= [ int(x) for x in pos.split(',') ]    
 
-            x = df_N['{}_{}'.format(R, crit_value)]
+            if 'HA' in crit_value:
+                crit = crit_value.split('_')[0]
+            else:
+                crit = crit_value
+            #
+            x = df_N['{}_{}'.format(R, crit)]
             y = df_N['@dwelling']
             trace_name = '{}|{}'.format(D,R)
-            # x = trace_name
-            trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
+            # trace_fill, trace_outline = assign_trace_fill_outline(D=D, R=R)
+#
             trace_bar = go.Bar(
                 x=x,
                 y=y,
@@ -436,10 +457,12 @@ def update_P220_RP_BarChart_BD1(
                 yaxis='y{}'.format(col),
                 orientation='h',
                 # width=bar_width,
-                marker=dict(
-                    color=trace_fill,
-                    line=dict(color=trace_outline, width=1.5),
-                    ),
+#
+                # marker=dict(
+                #     color=trace_fill,
+                #     line=dict(color=trace_outline, width=1.5),
+                #     ),
+#
                 name=trace_name,
                 text='<b>{}</b>'.format(R),
                 textfont=dict(

@@ -12,7 +12,10 @@ plotly.tools.set_credentials_file(username=PLOTLY_USERNAME, api_key=PLOTLY_API_K
 
 
 def get_db_connection(use_local_db=False):
-    conn = create_engine(os.environ['DATABASE_URL'], echo=True)
+    conn = create_engine(
+        os.environ['DATABASE_URL'],
+        echo=True,
+        )
     return conn.connect()
 
 
