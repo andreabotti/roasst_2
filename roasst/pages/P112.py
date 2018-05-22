@@ -4,7 +4,6 @@ import datetime as dt
 
 
 from roasst.app import app
-from roasst import urls
 from ..config import *
 from ..menus import *
 from roasst.pages.charts_HR import *
@@ -43,7 +42,8 @@ TABLES = []
 q = app.db_conn.execute('SHOW TABLES')
 for (table_name,) in q.fetchall():
         TABLES.append(table_name)
-TABLES_HR = [T for T in TABLES if '_HR' in T]
+TABLES_HR = [T for T in TABLES if ('_HR' in T) and ('24' in T)]
+TABLES_HR = [T for T in TABLES if ('_HR' in T)]
 
 #
 
@@ -69,7 +69,7 @@ input_menus = html.Div(
         html.Hr(
             style={'margin': '0 0 0 0'},
             ),
-        dash_create_menu_floor(
+        dash_create_menu_radio_floor(
             menu_id='input_F_P112', col=Fcol,
             width='row', df=df_sji,
             ),
@@ -285,8 +285,43 @@ def update_chart_scatter_P112(
             # SJ = D_SWSJ_HR.split('_')[1].split('JE')[1]
 
     #
+            if 'IES' in SWSJ:
+
+                table = D_SWSJ_HR
+                df_hr = pd.read_sql_query(
+                    con = app.db_conn,
+                    sql = """SELECT * FROM {table}
+                        WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+                        AND `{Ncol}` = '{N}'
+                        ;""".format(
+                            table=table,
+                            Wcol=Wcol, W=W_value,
+                            Fcol=Fcol, F=F_value,
+                            Ncol=Ncol, N=N_value,
+                            ),
+                    )
+                #
+                df_hr['datetime'] = pd.to_datetime(df_hr['datetime'])
+                df_hr.set_index('datetime', inplace=True)
+                df_hr.sort_index(axis=0, inplace=True)
+                df_hr = df_hr[start_date:end_date]
+                print(df_hr.shape)
+
+                # traces_hr += dash_HR_add_traces_EXT(
+                #     df=df_hr,
+                #     group='EXT',
+                #     linewidth=1.5,
+                #     )    
+                traces_hr += dash_HR_add_traces(
+                    df=df_hr,
+                    group=SWSJ,
+                    room=room,
+                    linewidth=1.2,
+                    dash_style=dict_line[i],
+                    )
+
             # df_hr = pd.DataFrame()
-            if 'OSJE' in SWSJ:
+            elif 'OSJE' in SWSJ:
 
                 table = D_SWSJ_HR
                 df_hr = pd.read_sql_query(

@@ -33,6 +33,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
     y1a = df[room+'_OT']
     y2a = df[room+'_HG_SOLAR(W)']
     y3a = df[room+'_HG_PPL(W)']
+    y3b = df[room+'_HG_EQP(W)']
     y4a = df[room+'_HL_VNT(W)']
     y5a = df[room+'_VNT(ach)']
 
@@ -64,18 +65,31 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
         legendgroup=group,
         )
 #
-    # trace3a = go.Scatter(
-    #     x = x,
-    #     y = y3a,
-    #     yaxis='y2',
-    #     name='PEOPLE ({})'.format(group),
-    #     line = dict(
-    #         color = 'rgb(57, 88, 39)',
-    #         width = linewidth,
-    #         dash = dash_style,
-    #         ),
-    #     legendgroup=group,
-    #     )
+    trace3a = go.Scatter(
+        x = x,
+        y = y3a,
+        yaxis='y2',
+        name='PEOPLE ({})'.format(group),
+        line = dict(
+            color = 'rgb(57, 88, 39)',
+            width = linewidth,
+            dash = dash_style,
+            ),
+        legendgroup=group,
+        )
+#
+    trace3b = go.Scatter(
+        x = x,
+        y = y3b,
+        yaxis='y2',
+        name='EQP ({})'.format(group),
+        line = dict(
+            color = 'rgb(80, 55, 39)',
+            width = linewidth,
+            dash = dash_style,
+            ),
+        legendgroup=group,
+        )
 #
     trace4a = go.Scatter(
         x = x,
@@ -106,7 +120,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
     traces_hr = [
     trace5a,
     trace2a,
-    # trace3a,
+    trace3a, trace3b,
     trace4a,
     trace1a,
     ]
@@ -253,7 +267,7 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
         margin=go.Margin(l=60, r=40, b=40, t=40),
         title='floor: <b>{F}</b> | room: <b>{R}</b>'.format(F=F_value,R=room),
         yaxis1=dict(
-            domain=[0, 0.12], range=[0,8], dtick=2, showgrid=False,
+            domain=[0, 0.14], range=[0,12], dtick=3, showgrid=False,
             #
             title='<b>NAT. VENT.<br>(ACH)</b>',
             titlefont=dict(
@@ -270,7 +284,7 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
             ),
         #
         yaxis2=dict(
-            domain=[0.18, 0.55], range=[-600,800], dtick=200, showgrid=True,
+            domain=[0.18, 0.55], range=[-800,800], dtick=200, showgrid=True,
             ticksuffix='W',
             #
             title='<b>HEAT GAINS / LOSSES</b>',
@@ -372,3 +386,5 @@ def create_layout_HR_comparison():
     )
 
     return layout_hr
+
+

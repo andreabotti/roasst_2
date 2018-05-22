@@ -3,7 +3,7 @@ import os
 import pandas as pd, numpy as np
 from pandas import *
 # import datetime as dt
-import dash_table_experiments
+import dash_table_experiments as dtt
 import json
 
 from roasst.app import app
@@ -106,7 +106,7 @@ input_menus = html.Div(
         html.Hr(
             style={'margin': '0 0 0 0'},
             ),
-        dash_create_menu_floor(
+        dash_create_menu_radio_floor(
             menu_id='input_F_P252', col=Fcol,
             width='row', df=df_sji,
             ),
@@ -153,14 +153,15 @@ col_sel = [
     ]
 #
 P252_table = html.Div(
-    # className='row',
+    className='container',
+    style={'display': 'none'},
     # style={
     #     'margin': '0 0 0 0', 'padding': '0', 'padding-top': '10', 'padding-bottom': '0',
     #     'font-size':11,
     #     'font-family': 'overpass',
     #     },
     children = [
-        dash_table_experiments.DataTable(
+        dtt.DataTable(
             id='P252_dyn_table',
             # min_height=600,
             # rows=[{}],
@@ -211,14 +212,14 @@ P252_layout = html.Div(
             className='ten columns',
             children = [
                 html.H5('TABLE'),
-                # P252_table,
+                P252_table,
                 html.H5('CHARTS'),
                 P252_chart,
                 ],
             ),
         ]
     )
-
+# import ipdb; ipdb.set_trace(),
 #
 
 # @app.callback(

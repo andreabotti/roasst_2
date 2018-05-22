@@ -4,7 +4,6 @@ import datetime as dt
 
 
 from roasst.app import app
-from roasst import urls
 from ..config import *
 from ..menus import *
 from roasst.pages.charts_HR import *
@@ -64,7 +63,7 @@ input_menus = html.Div(
             menu_id=['input_W1_P111','input_W2_P111'],
             width='one', WEATHER_FILES=WEATHER_FILES,
             ),
-        dash_create_menu_floor(menu_id='input_F_P111', col=Fcol,
+        dash_create_menu_radio_floor(menu_id='input_F_P111', col=Fcol,
             width='one', df=df_sji,
             ),
         dash_create_menu_north(menu_id='input_N_P111', col=Ncol,

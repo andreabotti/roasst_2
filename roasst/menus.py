@@ -94,7 +94,7 @@ def dash_create_menu_table_1field(tables, multi, menu_id, width, height):
     html_drowpdown = html.Div([
         html.H6('TABLE'),
         dcc.Dropdown(
-            id=menu_id, options=T_options, value='P1201_OSJE216_RP',
+            id=menu_id, options=T_options, value='',
             multi=multi,
         ),
     ],
@@ -254,7 +254,7 @@ def dash_create_menu_north(df, col, menu_id, width):
     )
 
 
-def dash_create_menu_floor(df, col, menu_id, width):
+def dash_create_menu_radio_floor(df, col, menu_id, width):
     F_list = [x for x in sorted(df[col].unique())]
     F_options = [{'label': x, 'value': x} for x in sorted(df[col].unique())]
 
@@ -272,6 +272,27 @@ def dash_create_menu_floor(df, col, menu_id, width):
             ),
         ],
     )
+
+
+def dash_create_menu_dropdown_floor(df, col, menu_id, multi, width, height):
+    # Defines input menus for exploring results
+    F_list = [x for x in sorted(df[col].unique())]
+    F_options = [{'label': x, 'value': x} for x in sorted(df[col].unique())]
+
+    html_drowpdown = html.Div(
+        className='{} columns'.format(width) if width!='row' else width,
+        style={
+        'margin-right': '10',
+        'height':height},
+        children = [
+            html.H6('FLOOR'),
+            dcc.Dropdown(
+                id=menu_id, options=F_options, value=F_list[0],
+                multi=multi,
+            ),
+        ],
+    )
+    return html_drowpdown
 
 
 #

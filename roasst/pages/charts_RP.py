@@ -14,6 +14,7 @@ plotly.tools.set_credentials_file(username='a.botti', api_key='MpDq2yINla4zb0TUd
 import plotly.plotly as py
 import plotly.graph_objs as go
 from plotly import tools
+import colorlover as cl
 
 # DASH
 import dash
@@ -24,8 +25,8 @@ import dash_html_components as html
 
 
 
-#####
 
+#
 
 def dash_fig_multi_RP_add_bars(fig_multi,
     df, platform,
@@ -344,6 +345,107 @@ def fig_multi_RP_add_traces_EP_IES_SAP(fig_multi, df_ies, df_ep, df_sap, N, N_an
     all_traces.append(trace)
 
 
+
+
+#
+
+def create_layout_P232_chart_KL():
+
+    layout = go.Layout(
+        # title = "test plot",
+        # paper_bgcolor = "rgb(223, 223, 223)",
+        font = dict(
+            family='Calibri,sans-serif',
+            size = 12,
+            color='grey',
+            ),
+        showlegend = True,
+        #
+        polar = dict(
+            # title = 'Ground Floor',
+            domain=dict(
+                x = [0, 1],
+                y = [0, 0.28],
+                ),
+            # bgcolor = "#FFFFFF",
+            angularaxis = dict(
+                # visible = False,
+                tickwidth = 3,
+                tickcolor = "#DDDDDD",
+                linewidth = 3,
+                linecolor = "#DDDDDD",
+                # layer = "below traces",
+                rotation=90,
+                direction = "clockwise",
+                ),
+            radialaxis = dict(
+                range=[0,18],
+                dtick=3,
+                # type='log',
+                showline = True,
+                linewidth = 0,
+                linecolor = "#E7E7E7",
+                tickwidth = 0,
+                gridwidth = 2,
+                gridcolor = "#ECECEC",
+                layer = "below traces",
+                )
+        ),
+        #
+        polar2 = dict(
+            domain=dict(
+                x = [0, 1],
+                y = [0.35, 0.63],
+                ),
+            bgcolor = "#F3F3F3",
+            angularaxis = dict(
+                tickwidth = 2,
+                linewidth = 2,
+                layer = "below traces",
+                rotation=90,
+                direction = "clockwise",
+                ),
+            radialaxis = dict(
+                range=[0,18],
+                # type='log',
+                showline = True,
+                linewidth = 2,
+                tickwidth = 2,
+                gridcolor = "white",
+                gridwidth = 2,
+                )
+        ),
+        #
+        polar3 = dict(
+            domain=dict(
+                x = [0, 1],
+                y = [0.7, 0.98],
+                ),
+            bgcolor = "#F3F3F3",
+            angularaxis = dict(
+                tickwidth = 2,
+                linewidth = 2,
+                layer = "below traces",
+                rotation=90,
+                direction = "clockwise",
+                ),
+            radialaxis = dict(
+                range=[0,20],
+                showline = True,
+                linewidth = 2,
+                tickwidth = 2,
+                gridcolor = "white",
+                gridwidth = 2,
+                )
+        ),
+
+    )
+
+    return layout
+
+
+
+#
 
 
 

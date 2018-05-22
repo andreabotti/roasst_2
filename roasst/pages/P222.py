@@ -131,7 +131,7 @@ input_menus = html.Div(
         html.Hr(
             style={'margin': '0 0 0 0'},
             ),
-        dash_create_menu_floor(
+        dash_create_menu_radio_floor(
             menu_id='input_F_P222', col=Fcol,
             width='row', df=df_sji,
             ),
@@ -196,6 +196,9 @@ P222_layout = html.Div(
             ),
         ]
     )
+
+
+WOWF_value = 0.2
 
 #
 @app.callback(
@@ -295,11 +298,30 @@ def update_P222_RP_BarChart_KL(
                     Fcol=Fcol, F=F_value,
                     wwBcol=wwBcol, WW_B=WW_B_value, wwKLcol=wwKLcol, WW_KL=WW_KL_value,
                     Gcol=Gcol, G=G_value,
+                    # WOWF=WOWF_value,
                 ),
             )
+
+        elif 'IES' in T:
+            df_rp = pd.read_sql_query(
+                con=app.db_conn,
+                sql="""SELECT * FROM {table}
+                    WHERE `{Wcol}` = '{W}' AND `{Fcol}` = '{F}'
+                    ;""".format(
+                    table=table,
+                    Wcol=Wcol, W=W_value,
+                    Fcol=Fcol, F=F_value,
+                ),
+            )
+
+        # print(df_rp.dtypes)
+        if '384' in SWSJ or '768' in SWSJ:
+            df_rp = df_rp[ df_rp['@wowf']==WOWF_value ]
+        else:
+            df_rp = df_rp
         print('df_rp: {}'.format(df_rp.shape))
 
-        # df_D = pd.concat([df_D, sel], axis=0)
+#
 
         for N in NORTH:
             df_N = df_rp[ df_rp['@north']==N ]
@@ -408,6 +430,7 @@ def update_P222_RP_BarChart_BD1(
     T_value = [T_value] if type(T_value).__name__ == 'str' else T_value
     W_value = '{}{}'.format(W1_value, W2_value)
     #
+
     
     df_D = pd.DataFrame()
     for T in T_value:
@@ -447,10 +470,15 @@ def update_P222_RP_BarChart_BD1(
                     Gcol=Gcol, G=G_value,
                 ),
             )
+
+        # print(df_rp.dtypes)
+        if '384' in SWSJ or '768' in SWSJ:
+            df_rp = df_rp[ df_rp['@wowf']==WOWF_value ]
+        else:
+            df_rp = df_rp
         print('df_rp: {}'.format(df_rp.shape))
 
-        # df_D = pd.concat([df_D, sel], axis=0)
-
+#
         for N in NORTH:
             df_N = df_rp[ df_rp['@north']==N ]
             

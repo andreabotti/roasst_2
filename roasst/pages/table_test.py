@@ -21,6 +21,9 @@ DF_GAPMINDER = pd.read_csv(
 DF_GAPMINDER = DF_GAPMINDER[DF_GAPMINDER['year'] == 2007]
 DF_GAPMINDER.loc[0:20]
 
+print(DF_GAPMINDER[:5])
+
+
 DF_SIMPLE = pd.DataFrame({
     'x': ['A', 'B', 'C', 'D', 'E', 'F'],
     'y': [4, 3, 1, 2, 3, 6],

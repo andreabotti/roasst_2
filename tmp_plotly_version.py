@@ -53,52 +53,56 @@ print('df_rp: {}'.format(df_rp.shape))
 # df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/hobbs-pearson-trials.csv")
 df = df_rp
 
+df_test = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/hobbs-pearson-trials.csv")
+print(df_test[:3])
+print(df_rp['@north'])
+
+
+
 #
 NORTH = [0,45,90,135,180,225,270,315]
 R = 'KL'
 crit = 'TM59_Ca'
 #
+col = '{}_{}'.format(R, crit)
+radius = df_rp[col] 
+theta = df_rp['@north']
+
+print(theta, radius)
 data = []
-for N in NORTH:
-    df_N = df_rp[ df_rp['@north']==N ]
-    
-    col = '{}_{}'.format(R, crit)
-    r = df_N.iloc[0][col]
-    theta = N
-    print(theta, r)
+trace = go.Scatterpolar(
+    r = radius,
+    theta = theta,
+    mode = "markers",
+    name = col,
+    marker = dict(
+        color = "rgb(27,158,119)",
+        size = 12,
+        # line = dict(
+        #     color = "white"
+        #     ),
+        # opacity = 0.7
+        ),
+    cliponaxis = False,
+    )
+data.append(trace)
 
-    trace = go.Scatterpolar(
-        r = r,
-        theta = theta,
-        mode = "markers",
-        name = col,
-        marker = dict(
-            color = "rgb(27,158,119)",
-            size = 12,
-            # line = dict(
-            #     color = "white"
-            #     ),
-            # opacity = 0.7
-            ),
-        cliponaxis = False,
-        )
-    data.append(trace)
 
-print(data[3])
-    
+# import ipdb; ipdb.set_trace()
+
 layout = go.Layout(
     title = "test plot",
     font = dict(
       size = 15
     ),
-    showlegend = True,
+    showlegend = False,
     polar = dict(
       bgcolor = "rgb(223, 223, 223)",
       angularaxis = dict(
         tickwidth = 2,
         linewidth = 3,
         layer = "below traces",
-        rotation=90,
+        # rotation=90,
         ),
       radialaxis = dict(
         range=[0,20],
@@ -112,6 +116,34 @@ layout = go.Layout(
     ),
     paper_bgcolor = "rgb(223, 223, 223)"
 )
+
+
+# TEMPLATE
+# layout = go.Layout(
+#     title = "Hobbs-Pearson Trials",
+#     font = dict(
+#       size = 15
+#     ),
+#     showlegend = False,
+#     polar = dict(
+#       bgcolor = "rgb(223, 223, 223)",
+#       angularaxis = dict(
+#         tickwidth = 2,
+#         linewidth = 3,
+#         layer = "below traces"
+#       ),
+#       radialaxis = dict(
+#         side = "counterclockwise",
+#         showline = True,
+#         linewidth = 2,
+#         tickwidth = 2,
+#         gridcolor = "white",
+#         gridwidth = 2
+#       )
+#     ),
+#     paper_bgcolor = "rgb(223, 223, 223)"
+# )
+
 
 fig = go.Figure(data=data, layout=layout)
 url = py.iplot(fig, filename='test_plot', validate = False)

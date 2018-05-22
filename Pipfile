@@ -22,7 +22,8 @@ alembic = "*"
 pymysql = "*"
 gunicorn = "*"
 matplotlib = "*"
-
+colorlover = "*"
+dash_colorscales = "*"
 
 [dev-packages]
 
