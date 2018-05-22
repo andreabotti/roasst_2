@@ -5,8 +5,9 @@ import dash_table_experiments as dtt
 
 from roasst.app import app
 
-from roasst.pages import P111_layout, P112_layout, P221_layout, P222_layout,P232_layout, P252_layout 
-from roasst.pages import RP_BARS_layout
+from roasst.pages import (P111_layout, P112_layout, P221_layout, P222_layout, P232_layout, P252_layout, RP_BARS_layout,
+                          RP_POLAR_layout)
+
 #
 
 url_P111 = '/P111'
@@ -17,6 +18,7 @@ url_P232 = '/P232'
 url_P252 = '/P252'
 #
 url_RP_BARS = '/RP_BARS'
+url_RP_POLAR = '/RP_POLAR'
 
 #
 
@@ -31,17 +33,18 @@ app.layout = html.Div([
     dcc.Link('RP_BARS', href=url_RP_BARS, style={'margin': link_margin}),
     #
     dcc.Link('RP_polar_V', href=url_P232, style={'margin': link_margin}),
+    dcc.Link('RP_polar_NEW', href=url_RP_POLAR, style={'margin': link_margin}),
     dcc.Link('RP_table_filter', href=url_P252, style={'margin': link_margin}),
     html.Br(),
     html.Hr(
         style={'margin': '0 0 0 0'},
-        ),
+    ),
     html.Div(id='page-content'),
 ])
 
 index_page = html.Div(
     html.H5('INDEX PAGE'),
-    )
+)
 
 
 # Update the index
@@ -65,7 +68,8 @@ def display_page(pathname):
         return P232_layout
     elif pathname == url_P252:
         return P252_layout
+    elif pathname == url_RP_POLAR:
+        return RP_POLAR_layout
     #
     else:
         return index_page
-
