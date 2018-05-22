@@ -3,10 +3,113 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table_experiments as dt
+# import dash_table_experiments as dtt
+import dash_colorscales
+import json
 
 
-def dash_create_menu_unit(DWELLINGS, menu_type, menu_id, width):
+#
+
+def dash_create_menu_colorscales(menu_id, swatches, width,**kwargs):
+    # colorscale = kwargs.get('colorscale', None)
+    return html.Div(
+        className='{} columns'.format(width) if width!='row' else width,
+        style={'fontSize': 12},
+        children=[
+            html.H6('ColorScale'),
+            dash_colorscales.DashColorscales(
+                id=menu_id,
+            #     # colorscale=colorscale,
+                nSwatches=swatches,
+                fixSwatches=False,
+                ),
+            html.P(id='color_output', children='')
+            ]
+        )
+
+
+#
+
+def dash_create_menu_textinput(menu_id, width):
+    return html.Div(
+        className='{} columns'.format(width) if width!='row' else width,
+        style={'fontSize': 12},
+        children=[
+            html.H6('TRACES'),
+            dcc.Input(id=menu_id[0], value='', type='text'),
+            dcc.Input(id=menu_id[1], value='', type='text'),
+            dcc.Input(id=menu_id[2], value='', type='text'),
+        ]
+    )
+
+#
+
+def dash_create_menu_dwelling_textinput(menu_id, width):
+    return html.Div(
+        className='{} columns'.format(width) if width!='row' else width,
+        style={'fontSize': 12},
+        children=[
+            html.H6('TRACES'),
+            dcc.Input(id=menu_id[0], value='P1201_OSJE24_HR', type='text'),
+            dcc.Input(id=menu_id[1], value='DSBJE_P1201_24', type='text'),
+            dcc.Input(id=menu_id[2], value='DSB_P1201', type='text'),
+        ]
+    )
+
+#
+
+def dash_create_menu_table_3fields(tables, multi, menu_id, width):
+    # Defines input menus for exploring results
+    T_list = [x for x in sorted(tables)]
+    T_options = [{'label': x, 'value': x} for x in sorted(tables)]
+
+    html_drowpdown = html.Div([
+        html.H6('TABLE'),
+        dcc.Dropdown(
+            id=menu_id[0], options=T_options, value='P1201_OSJE216_HR',
+            multi=multi,
+        ),
+        dcc.Dropdown(
+            id=menu_id[1], options=T_options, value=T_list[-1],
+            multi=multi,
+        ),
+        dcc.Dropdown(
+            id=menu_id[2], options=T_options, value=T_list[-1],
+            multi=multi,
+        ),
+    ],
+        className='{} columns'.format(width) if width!='row' else width,
+        style={'margin-right': '10'},
+    )
+
+    return html_drowpdown
+
+#
+
+def dash_create_menu_table_1field(tables, multi, menu_id, width, height):
+    # Defines input menus for exploring results
+    T_list = [x for x in sorted(tables)]
+    T_options = [{'label': x, 'value': x} for x in sorted(tables)]
+
+    html_drowpdown = html.Div([
+        html.H6('TABLE'),
+        dcc.Dropdown(
+            id=menu_id, options=T_options, value='',
+            multi=multi,
+        ),
+    ],
+        className='{} columns'.format(width) if width!='row' else width,
+        style={
+        'margin-right': '10',
+        'height':height},
+    )
+
+    return html_drowpdown
+
+
+#
+
+def dash_create_menu_dwelling(DWELLINGS, menu_type, menu_id, width):
     # Defines input menus for exploring results
     D_list = [x for x in sorted(DWELLINGS)]
     D_options = [{'label': x, 'value': x} for x in sorted(DWELLINGS)]
@@ -30,7 +133,7 @@ def dash_create_menu_unit(DWELLINGS, menu_type, menu_id, width):
             multi=True,
         ),
     ],
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         style={'margin-right': '10'},
     )
 
@@ -42,9 +145,58 @@ def dash_create_menu_unit(DWELLINGS, menu_type, menu_id, width):
         print('Wrong menu type selection')
 
 
+
+# def dash_create_menu_weather(WEATHER_FILES, menu_id, widths):
+#     dict_weather = {
+#         'GTW': 'Gatwick Airport (rural)',
+#         'LHR': 'Heathrow Airport (semi-urban)',
+#         'LWC': 'LDN Weather Centre (urban)',
+#     }
+#     W1_list = [x[:3] for x in sorted(WEATHER_FILES)]
+
+#     if widths[0] == 'one':
+#         W1_options = [{'label': x, 'value': x} for x in W1_list]
+#     else:
+#         W1_options = [{'label': dict_weather[x], 'value': x} for x in W1_list]
+
+#     #
+#     W2_list = ['DSY1', 'DSY2', 'DSY3']
+#     W2_options = [{'label': i, 'value': i} for i in W2_list]
+
+#     html_wea = html.Div([
+#         html.Div([
+#             html.H6('WEATHER'),
+#             html.Label('LOCATION'),
+#             dcc.RadioItems(
+#                 id=menu_id[0], options=W1_options, value=W1_list[0],
+#             ),
+#         ],
+#             className='{} columns'.format(widths[0]),
+#         ),
+
+#         html.Div([
+#             html.H6('WEATHER'),
+#             html.Label('DSY'),
+#             dcc.RadioItems(
+#                 id=menu_id[1], options=W2_options, value=W2_list[0],
+#                 # labelStyle={'display': 'inline-block'}
+#             ),
+#         ],
+#             className='{} columns'.format(widths[1]),
+#             style={
+#                 # 'fontSize': 13,
+#                 # 'padding': '5',
+#             },
+#         ),
+#     ])
+
+#     return html_wea
+
+
+
 #
 
-def dash_create_menu_weather(WEATHER_FILES, menu_id, widths):
+def dash_create_menu_weather(WEATHER_FILES, menu_id, width):
     dict_weather = {
         'GTW': 'Gatwick Airport (rural)',
         'LHR': 'Heathrow Airport (semi-urban)',
@@ -52,10 +204,10 @@ def dash_create_menu_weather(WEATHER_FILES, menu_id, widths):
     }
     W1_list = [x[:3] for x in sorted(WEATHER_FILES)]
 
-    if widths[0] == 'one':
-        W1_options = [{'label': x, 'value': x} for x in W1_list]
-    else:
-        W1_options = [{'label': dict_weather[x], 'value': x} for x in W1_list]
+    # Short List
+    W1_options = [{'label': x, 'value': x} for x in W1_list]
+    # Long List
+    # W1_options = [{'label': dict_weather[x], 'value': x} for x in W1_list]
 
     #
     W2_list = ['DSY1', 'DSY2', 'DSY3']
@@ -64,27 +216,17 @@ def dash_create_menu_weather(WEATHER_FILES, menu_id, widths):
     html_wea = html.Div([
         html.Div([
             html.H6('WEATHER'),
-            html.Label('LOCATION'),
+            # html.Label('LOCATION'),
             dcc.RadioItems(
                 id=menu_id[0], options=W1_options, value=W1_list[0],
-            ),
-        ],
-            className='{} columns'.format(widths[0]),
-        ),
-
-        html.Div([
-            html.H6('WEATHER'),
-            html.Label('DSY'),
+                labelStyle={'display': 'inline-block'},
+                ),
             dcc.RadioItems(
                 id=menu_id[1], options=W2_options, value=W2_list[0],
-                # labelStyle={'display': 'inline-block'}
-            ),
-        ],
-            className='{} columns'.format(widths[1]),
-            style={
-                # 'fontSize': 13,
-                # 'padding': '5',
-            },
+                labelStyle={'display': 'inline-block'},
+                ),
+            ],
+            className='{} columns'.format(width) if width!='row' else width,
         ),
     ])
 
@@ -108,17 +250,16 @@ def dash_create_menu_north(df, col, menu_id, width):
             labelStyle={'display': 'inline-block'}
         ),
     ],
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
     )
 
 
-def dash_create_menu_floor(df, col, menu_id, width):
+def dash_create_menu_radio_floor(df, col, menu_id, width):
     F_list = [x for x in sorted(df[col].unique())]
     F_options = [{'label': x, 'value': x} for x in sorted(df[col].unique())]
 
-    # F radio
     return html.Div(
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         # style={
         #     'margin': '0 0 0 0',
         #     'padding': '0 0 0 0',
@@ -127,10 +268,31 @@ def dash_create_menu_floor(df, col, menu_id, width):
             html.H6('FLOOR'),
             dcc.RadioItems(
                 id=menu_id, options=F_options, value=F_list[0],
-                # labelStyle={'display': 'inline-block'}
+                labelStyle={'display': 'inline-block'},
             ),
         ],
     )
+
+
+def dash_create_menu_dropdown_floor(df, col, menu_id, multi, width, height):
+    # Defines input menus for exploring results
+    F_list = [x for x in sorted(df[col].unique())]
+    F_options = [{'label': x, 'value': x} for x in sorted(df[col].unique())]
+
+    html_drowpdown = html.Div(
+        className='{} columns'.format(width) if width!='row' else width,
+        style={
+        'margin-right': '10',
+        'height':height},
+        children = [
+            html.H6('FLOOR'),
+            dcc.Dropdown(
+                id=menu_id, options=F_options, value=F_list[0],
+                multi=multi,
+            ),
+        ],
+    )
+    return html_drowpdown
 
 
 #
@@ -148,7 +310,7 @@ def dash_create_menu_vnt(df, cols, menu_id, width):
 
     # VNT radio
     return html.Div(
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         style={
             'margin': '10 0 0 0',
             'padding': '0 0 0 0',
@@ -201,7 +363,7 @@ def dash_create_menu_window_width(df, cols, menu_id, width):
         ],  # className= 'one column',
         ),
     ],
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
     )
 
 
@@ -220,7 +382,7 @@ def dash_create_menu_glazing(df, col, menu_id, width):
             # labelStyle={'display': 'inline-block'}
         ),
     ],
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
     )
 
 
@@ -232,7 +394,7 @@ def dash_create_menu_rooms(ROOMS, menu_id, width):
     ROOM_options = [{'label': x, 'value': x} for x in ROOMS]
 
     return html.Div(
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         children=[
             html.H6('ROOM'),
             dcc.RadioItems(
@@ -252,7 +414,7 @@ def dash_create_menu_month(width):
     month_options = {5: 'MAY', 6: 'JUN', 7: 'JUL', 8: 'AUG', 9: 'SEP'}
 
     return html.Div(
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         children=[
             html.H6('Choose Date Range'),
             dcc.RangeSlider(
@@ -268,34 +430,22 @@ def dash_create_menu_month(width):
     )
 
 
-def dash_create_menu_datepickerrange(width):
+def dash_create_menu_datepickerrange(menu_id, width, fontsize):
     return html.Div(
-        className='{} columns'.format(width),
-        style={'fontSize': 12},
+        className='{} columns'.format(width) if width!='row' else width,
+        style={'fontSize': fontsize},
         children=[
             html.H6('DATE'),
             dcc.DatePickerRange(
-                id='date_picker_range',
+                id=menu_id,
                 start_date=dt(1989, 5, 1),
                 end_date_placeholder_text='Select a date',
                 display_format='MMM, DD',
-                day_size=30,
+                day_size=25,
+                first_day_of_week=1,
                 # with_portal=True,
-                # calendar_orientation='vertical',
+                calendar_orientation='horizontal',
             )
-        ]
-    )
-
-
-def dash_create_menu_textinput(menu_id, width):
-    return html.Div(
-        className='{} columns'.format(width),
-        style={'fontSize': 12},
-        children=[
-            html.H6('TRACES'),
-            dcc.Input(id=menu_id[0], value='', type='text'),
-            dcc.Input(id=menu_id[1], value='', type='text'),
-            dcc.Input(id=menu_id[2], value='', type='text'),
         ]
     )
 
@@ -303,18 +453,18 @@ def dash_create_menu_textinput(menu_id, width):
 #
 
 
-def dash_create_menu_OH_metric():
-    metrics = ['HA26p', 'TM59_Ca']
+def dash_create_menu_OH_criterion(menu_id, width):
+    metrics = ['HA26p_HA28p', 'TM59_Ca']
     crit_list = [x for x in metrics]
     crit_options = [{'label': x, 'value': x} for x in metrics]
 
     # OH radio
     return html.Div(
-        className='{} columns'.format(width),
+        className='{} columns'.format(width) if width!='row' else width,
         children=[
-            html.H6('OH Criterion'),
+            html.H6('OH Metric'),
             dcc.RadioItems(
-                id='crit_input', options=crit_options, value=crit_list[0],
+                id=menu_id, options=crit_options, value=crit_list[1],
                 # labelStyle={'display': 'inline-block'}
             ),
         ],

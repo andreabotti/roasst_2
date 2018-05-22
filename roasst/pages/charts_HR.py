@@ -20,7 +20,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table_experiments as dt
+# import dash_table_experiments as dt
 
 
 
@@ -33,9 +33,11 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
     y1a = df[room+'_OT']
     y2a = df[room+'_HG_SOLAR(W)']
     y3a = df[room+'_HG_PPL(W)']
+    y3b = df[room+'_HG_EQP(W)']
     y4a = df[room+'_HL_VNT(W)']
     y5a = df[room+'_VNT(ach)']
-#####
+
+#
 
     trace1a = go.Scatter(
         x = x,
@@ -49,7 +51,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
     trace2a = go.Scatter(
         x = x,
         y = y2a,
@@ -62,7 +64,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
     trace3a = go.Scatter(
         x = x,
         y = y3a,
@@ -75,7 +77,20 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
+    trace3b = go.Scatter(
+        x = x,
+        y = y3b,
+        yaxis='y2',
+        name='EQP ({})'.format(group),
+        line = dict(
+            color = 'rgb(80, 55, 39)',
+            width = linewidth,
+            dash = dash_style,
+            ),
+        legendgroup=group,
+        )
+#
     trace4a = go.Scatter(
         x = x,
         y = y4a,
@@ -88,7 +103,7 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
             ),
         legendgroup=group,
         )
-#####
+#
     trace5a = go.Scatter(
         x = x,
         y = y5a,
@@ -102,8 +117,15 @@ def dash_HR_add_traces(df, group, room, linewidth, dash_style):
         legendgroup=group,
         )
 
-    traces_hr = [trace5a, trace2a, trace3a, trace4a, trace1a]
+    traces_hr = [
+    trace5a,
+    trace2a,
+    trace3a, trace3b,
+    trace4a,
+    trace1a,
+    ]
     return traces_hr
+
 
 #####
 
@@ -243,8 +265,72 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
     
     layout_hr = go.Layout(
         margin=go.Margin(l=60, r=40, b=40, t=40),
-        title='<i>unit</i>: <b>{D}</b> | <i>floor</i>: <b>{F}</b>' \
-            ' |  <i>room</i>: <b>{R}</b>'.format(D=D_value,F=F_value,R=room),
+        title='floor: <b>{F}</b> | room: <b>{R}</b>'.format(F=F_value,R=room),
+        yaxis1=dict(
+            domain=[0, 0.14], range=[0,12], dtick=3, showgrid=False,
+            #
+            title='<b>NAT. VENT.<br>(ACH)</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=12,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+            ),
+        #
+        yaxis2=dict(
+            domain=[0.18, 0.55], range=[-800,800], dtick=200, showgrid=True,
+            ticksuffix='W',
+            #
+            title='<b>HEAT GAINS / LOSSES</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=15,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+            ),
+        #
+        yaxis3=dict(
+            domain=[0.62,1], range=[20,34], dtick=2, showgrid=True,
+            ticksuffix='°C',
+            #
+            title='<b>TEMPERATURE</b>',
+            titlefont=dict(
+                family='Calibri Light,sans-serif',
+                size=15,
+                color='grey'
+                ),
+            showticklabels=True,
+            tickfont=dict(
+                family='Calibri,sans-serif',
+                size=11,
+                color='grey'
+                ),
+        ),
+    )
+
+    return layout_hr
+
+
+
+#
+
+
+def create_layout_HR_comparison():
+    
+    layout_hr = go.Layout(
+        margin=go.Margin(l=60, r=40, b=40, t=40),
         yaxis1=dict(
             domain=[0, 0.12], range=[0,8], dtick=2, showgrid=False,
             #
@@ -300,3 +386,5 @@ def create_layout_EP_IES_HR(D_value, F_value, room):
     )
 
     return layout_hr
+
+

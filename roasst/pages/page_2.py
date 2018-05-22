@@ -33,7 +33,7 @@ D = DWELLINGS[0]
 SIM_TOOL, SIM_JOBS, RVX = 'JESS', 24, 'EMS_HR_RP'
 SHOW_IES = False
 
-table = 'OSJE_{}_{}_SJI'.format(D, SIM_JOBS)
+table = 'TEMPLATE_SJI'
 df_sji = pd.read_sql_query('SELECT * FROM {}'.format(table),app.db_conn)
 #
 
@@ -45,13 +45,13 @@ input_menus = html.Div(
         'font-size':13,
         },
     children=[
-        dash_create_menu_unit(
+        dash_create_menu_dwelling(
             menu_id='D_input(p2)',
             width='one', menu_type='radio', DWELLINGS=DWELLINGS,
             ),
         dash_create_menu_weather(
             menu_id=['W1_input(p2)','W2_input(p2)'],
-            widths=['one','one'], WEATHER_FILES=WEATHER_FILES,
+            width='one', WEATHER_FILES=WEATHER_FILES,
             ),
         dash_create_menu_floor(menu_id='F_input(p2)', col=Fcol,
             width='one', df=df_sji,
@@ -69,7 +69,8 @@ input_menus = html.Div(
             width='one', df=df_sji,
             ),
         dash_create_menu_rooms(menu_id='R_input(p2)', width='one', ROOMS=ROOMS),
-        dash_create_menu_datepickerrange(width='one'),
+        dash_create_menu_datepickerrange(menu_id='input_date_p2',
+            fontsize=11, width='one'),
         dash_create_menu_textinput(
             menu_id=[
                 'trace_group_1_input(p2)',
@@ -173,7 +174,7 @@ def set_vnt_B_value(available_options):
         Input('VNT_B_input(p2)', 'value'), Input('VNT_KL_input(p2)', 'value'),
         Input('WW_B_input(p2)', 'value'), Input('WW_KL_input(p2)', 'value'),
         Input('G_input(p2)', 'value'), Input('R_input(p2)', 'value'),
-        Input('date_picker_range', 'start_date'), Input('date_picker_range', 'end_date'),
+        Input('input_date_p2', 'start_date'), Input('input_date_p2', 'end_date'),
         Input('trace_group_1_input(p2)', 'value'),
         Input('trace_group_2_input(p2)', 'value'),
         Input('trace_group_3_input(p2)', 'value'),

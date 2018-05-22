@@ -1,0 +1,4 @@
+mysql+pymysql://root:r04sst@localhost:8000/ROASST
+mysql+pymysql://andreab:abotti@jea.ensims.com/ROASST
+
+path to start dash app: D:\Dropbox\EDU_EngD\ROASST\github\roasst_2
