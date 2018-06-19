@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 pandas = "*"
 dash = "*"
 numpy = "*"
@@ -24,12 +21,10 @@ gunicorn = "*"
 matplotlib = "*"
 colorlover = "*"
 dash_colorscales = "*"
+scipy = "*"
 
 [dev-packages]
-
 ipdb = "*"
 
-
 [requires]
-
 python_version = "3.6"
